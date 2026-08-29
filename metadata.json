@@ -1,0 +1,6 @@
+{
+  "name": "Pak Tax Calculator",
+  "description": "Accurate Pakistan Federal FBR and Provincial Tax Calculator (PRA Punjab, SRB Sindh, KPRA, BRA, ICT) for Salary, Services, Agriculture, Property, and Vehicles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
