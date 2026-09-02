@@ -318,22 +318,22 @@ Calculated via Pak Tax Calculator`;
 
             {/* Primary Gross Input */}
             {!useDetailedBreakdown ? (
-              <div className="space-y-2 rounded-2xl border-2 border-emerald-200 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 p-3.5 shadow-sm">
+                           <div className="space-y-2 rounded-2xl border-2 border-red-300 bg-gradient-to-r from-red-50 via-white to-red-50 p-3.5 shadow-sm">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex-1">
-                    <div className="mb-1 inline-flex items-center rounded-full border border-emerald-300 bg-emerald-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-900">
+                    <div className="mb-1 inline-flex items-center rounded-full border border-red-400 bg-red-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-red-900">
                       Enter your income
                     </div>
                     <div className="text-sm font-bold text-slate-800">
                       {period === 'monthly' ? 'Monthly Gross Salary / Income' : 'Annual Gross Salary / Income'} (PKR)
                     </div>
                   </div>
-                  <span className="text-xs font-bold text-emerald-800 bg-white px-2.5 py-1 rounded-lg border border-emerald-200 shadow-xs">
+                  <span className="text-xs font-bold text-red-800 bg-white px-2.5 py-1 rounded-lg border border-red-300 shadow-xs">
                     {formatPakistaniUnits(inputState.grossSalary)}
                   </span>
                 </div>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-700 font-black text-base">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-red-700 font-black text-base">
                     Rs.
                   </span>
                   <input
@@ -344,10 +344,9 @@ Calculated via Pak Tax Calculator`;
                     value={inputState.grossSalary || ''}
                     onChange={(e) => handleInputChange('grossSalary', Math.max(0, Number(e.target.value)))}
                     placeholder="Enter amount (e.g. 150000)"
-                    className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-emerald-300 rounded-xl text-lg font-black text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-hidden focus:ring-4 focus:ring-emerald-200 focus:border-emerald-600 transition-all font-mono shadow-sm"
+                    className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-red-400 rounded-xl text-lg font-black text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-hidden focus:ring-4 focus:ring-red-200 focus:border-red-600 transition-all font-mono shadow-sm"
                   />
-                </div>
-                <p className="text-[11px] text-slate-600">
+                </div>                <p className="text-[11px] text-slate-600">
                   Equivalent to {formatPKR(period === 'monthly' ? inputState.grossSalary * 12 : inputState.grossSalary / 12)} {period === 'monthly' ? 'per year' : 'per month'}
                 </p>
               </div>
