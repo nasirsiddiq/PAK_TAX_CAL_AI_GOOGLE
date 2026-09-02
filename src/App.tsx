@@ -193,7 +193,7 @@ function setCalculatorStructuredData(title: string, description: string, url: st
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<AppTab>(() => getTabFromPathname(window.location.pathname));
-  const [taxYear, setTaxYear] = useState<TaxYear>('2025-2026');
+  const [taxYear, setTaxYear] = useState<TaxYear>('2026-2027');
   const [taxpayerCategory, setTaxpayerCategory] = useState<TaxpayerCategory>('salaried');
   const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -441,8 +441,17 @@ export default function App() {
         initialSignUp={openAuthAsSignUp}
       />
 
-      <aside className="fixed bottom-4 right-4 z-30 w-[calc(100%-2rem)] max-w-xl rounded-xl border border-emerald-200 bg-white/95 p-3 shadow-lg backdrop-blur xl:hidden print:hidden" aria-label="Quick calculator links">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      {/*
+        These three floating widgets are `fixed`, so they stay pinned to the
+        viewport and visually sit on top of whatever's scrolled underneath
+        them — including the footer once you scroll that far. Without
+        `pointer-events-none` on the outer wrapper, clicks anywhere in their
+        padding/whitespace (not just on the buttons) get swallowed instead of
+        passing through to the footer links behind them. `pointer-events-auto`
+        on the actual clickable card/button opts it back in.
+      */}
+      <aside className="fixed bottom-4 right-4 z-30 w-[calc(100%-2rem)] max-w-xl xl:hidden print:hidden pointer-events-none" aria-label="Quick calculator links">
+        <div className="pointer-events-auto rounded-xl border border-emerald-200 bg-white/95 p-3 shadow-lg backdrop-blur flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs font-bold text-slate-700">Open another calculator:</p>
           <div className="flex gap-2">
             {quickLinks.map((link) => <button key={link.tab} onClick={() => navigateToCalculator(link.tab)} className={`flex-1 rounded-lg px-3 py-2 text-xs font-bold transition-colors cursor-pointer sm:flex-none ${link.tone === 'emerald' ? 'bg-emerald-800 text-white hover:bg-emerald-700' : 'border border-sky-300 bg-sky-50 text-sky-800 hover:bg-sky-100'}`}>{link.label}</button>)}
@@ -450,16 +459,16 @@ export default function App() {
         </div>
       </aside>
 
-      <aside className="fixed left-4 top-1/2 z-30 hidden w-32 -translate-y-1/2 xl:block print:hidden" aria-label="Related calculator link">
-        <button onClick={() => navigateToCalculator(quickLinks[0].tab)} className="w-full rounded-xl border border-emerald-300 bg-white p-3 text-left shadow-lg transition hover:border-emerald-500 hover:bg-emerald-50 cursor-pointer">
+      <aside className="fixed left-4 top-1/2 z-30 hidden w-32 -translate-y-1/2 xl:block print:hidden pointer-events-none" aria-label="Related calculator link">
+        <button onClick={() => navigateToCalculator(quickLinks[0].tab)} className="pointer-events-auto w-full rounded-xl border border-emerald-300 bg-white p-3 text-left shadow-lg transition hover:border-emerald-500 hover:bg-emerald-50 cursor-pointer">
           <span className="block text-[10px] font-bold uppercase tracking-wider text-emerald-700">{quickLinks[0].label}</span>
           <span className="mt-1 block text-sm font-extrabold leading-snug text-slate-900">{quickLinks[0].prompt}</span>
           <span className="mt-3 block text-xs font-bold text-emerald-800">Open calculator →</span>
         </button>
       </aside>
 
-      <aside className="fixed right-4 top-1/2 z-30 hidden w-32 -translate-y-1/2 xl:block print:hidden" aria-label="Related calculator link">
-        <button onClick={() => navigateToCalculator(quickLinks[1].tab)} className="w-full rounded-xl border border-sky-300 bg-white p-3 text-left shadow-lg transition hover:border-sky-500 hover:bg-sky-50 cursor-pointer">
+      <aside className="fixed right-4 top-1/2 z-30 hidden w-32 -translate-y-1/2 xl:block print:hidden pointer-events-none" aria-label="Related calculator link">
+        <button onClick={() => navigateToCalculator(quickLinks[1].tab)} className="pointer-events-auto w-full rounded-xl border border-sky-300 bg-white p-3 text-left shadow-lg transition hover:border-sky-500 hover:bg-sky-50 cursor-pointer">
           <span className="block text-[10px] font-bold uppercase tracking-wider text-sky-700">{quickLinks[1].label}</span>
           <span className="mt-1 block text-sm font-extrabold leading-snug text-slate-900">{quickLinks[1].prompt}</span>
           <span className="mt-3 block text-xs font-bold text-sky-800">Open calculator →</span>

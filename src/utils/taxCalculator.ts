@@ -72,7 +72,7 @@ export function calculateIncomeTax(params: {
   itExportRate?: number; // 0.0025 for PSEB or 0.01 standard
 }): TaxCalculationResult {
   const { taxYear, taxpayerCategory, period, input, itExportRate = 0.0025 } = params;
-  const config = TAX_YEARS_CONFIG[taxYear] || TAX_YEARS_CONFIG['2025-2026'];
+  const config = TAX_YEARS_CONFIG[taxYear] || TAX_YEARS_CONFIG['2026-2027'];
   const multiplier = period === 'monthly' ? 12 : 1;
 
   let grossSalaryAnnual = 0;

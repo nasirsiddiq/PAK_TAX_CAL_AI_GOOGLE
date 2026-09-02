@@ -1,4 +1,4 @@
-export type TaxYear = '2025-2026' | '2024-2025' | '2023-2024' | '2022-2023';
+export type TaxYear = '2026-2027' | '2025-2026' | '2024-2025' | '2023-2024' | '2022-2023';
 
 export type TaxpayerCategory = 'salaried' | 'non_salaried' | 'aop' | 'it_freelance_export';
 

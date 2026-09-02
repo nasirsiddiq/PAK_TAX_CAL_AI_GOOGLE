@@ -1,13 +1,29 @@
 import { TaxYearConfig } from '../types/tax';
 
 export const TAX_YEARS_CONFIG: Record<string, TaxYearConfig> = {
-  '2025-2026': {
-    year: '2025-2026',
-    label: 'FY 2025-2026',
-    sublabel: 'Tax Year 2026 (Effective July 1, 2025 - June 30, 2026)',
+  // Tax Year 2027 (FY 2026-2027) — current tax year as of the site's last data
+  // review. Salaried slabs and the salaried surcharge were revised by the
+  // Finance Act 2026: four upper brackets were cut (23%→20%, 30%→25%,
+  // 35%→29%, 35%→32%) and the top-rate threshold was raised from Rs. 4.1M to
+  // Rs. 7M; the surcharge on the salaried class was abolished. Non-salaried/
+  // AOP slabs were not changed by that Act, so they're carried over unchanged
+  // from FY 2025-2026 below. Sources: Federal Board of Revenue Budget
+  // 2026-27 portal (fbr.gov.pk/Budget2026-27), Dawn ("Budget FY26-27: What
+  // relief measures has the government announced for next year?"), and The
+  // Express Tribune ("Budget 2026-27: Govt cuts taxes, ends surcharge for
+  // four salaried class income slabs") — both published June 2026.
+  '2026-2027': {
+    year: '2026-2027',
+    label: 'FY 2026-2027',
+    sublabel: 'Tax Year 2027 (Effective July 1, 2026 - June 30, 2027)',
     isCurrent: true,
-    surchargeThreshold: 10000000,
-    surchargeRate: 0.10,
+    // Surcharge on the salaried class was abolished for this tax year, so no
+    // surchargeThreshold/surchargeRate is set here. Note: this site could not
+    // fully confirm whether the abolition also covers non-salaried/AOP
+    // taxpayers — PwC's Pakistan tax summary (reviewed Aug 2026) still shows
+    // a 10% surcharge above Rs. 10M for non-salaried individuals and AOPs.
+    // If you rely on this for a non-salaried/AOP high-income case, confirm
+    // the current surcharge position with FBR or a tax advisor.
     salariedSlabs: [
       {
         min: 0,
@@ -64,6 +80,106 @@ export const TAX_YEARS_CONFIG: Record<string, TaxYearConfig> = {
         baseTax: 1424000,
         rate: 0.35,
         description: 'Rs. 1,424,000 + 35% of the amount exceeding Rs. 7,000,000',
+      },
+    ],
+    // Unchanged from FY 2025-2026 — see note above.
+    nonSalariedSlabs: [
+      {
+        min: 0,
+        max: 600000,
+        baseTax: 0,
+        rate: 0,
+        description: 'Where taxable income does not exceed Rs. 600,000',
+      },
+      {
+        min: 600000,
+        max: 1200000,
+        baseTax: 0,
+        rate: 0.15,
+        description: '15% of the amount exceeding Rs. 600,000',
+      },
+      {
+        min: 1200000,
+        max: 1600000,
+        baseTax: 90000,
+        rate: 0.20,
+        description: 'Rs. 90,000 + 20% of the amount exceeding Rs. 1,200,000',
+      },
+      {
+        min: 1600000,
+        max: 3200000,
+        baseTax: 170000,
+        rate: 0.30,
+        description: 'Rs. 170,000 + 30% of the amount exceeding Rs. 1,600,000',
+      },
+      {
+        min: 3200000,
+        max: 5600000,
+        baseTax: 650000,
+        rate: 0.40,
+        description: 'Rs. 650,000 + 40% of the amount exceeding Rs. 3,200,000',
+      },
+      {
+        min: 5600000,
+        max: null,
+        baseTax: 1610000,
+        rate: 0.45,
+        description: 'Rs. 1,610,000 + 45% of the amount exceeding Rs. 5,600,000',
+      },
+    ],
+    // No surchargeThreshold/surchargeRate here — see the note above the
+    // salariedSlabs comment: abolished for the salaried class, unconfirmed
+    // for non-salaried/AOP.
+  },
+  '2025-2026': {
+    year: '2025-2026',
+    label: 'FY 2025-2026',
+    sublabel: 'Tax Year 2026 (Effective July 1, 2025 - June 30, 2026)',
+    isCurrent: false,
+    surchargeThreshold: 10000000,
+    surchargeRate: 0.09,
+    salariedSlabs: [
+      {
+        min: 0,
+        max: 600000,
+        baseTax: 0,
+        rate: 0,
+        description: 'Where taxable income does not exceed Rs. 600,000',
+      },
+      {
+        min: 600000,
+        max: 1200000,
+        baseTax: 0,
+        rate: 0.01,
+        description: '1% of the amount exceeding Rs. 600,000',
+      },
+      {
+        min: 1200000,
+        max: 2200000,
+        baseTax: 6000,
+        rate: 0.11,
+        description: 'Rs. 6,000 + 11% of the amount exceeding Rs. 1,200,000',
+      },
+      {
+        min: 2200000,
+        max: 3200000,
+        baseTax: 116000,
+        rate: 0.23,
+        description: 'Rs. 116,000 + 23% of the amount exceeding Rs. 2,200,000',
+      },
+      {
+        min: 3200000,
+        max: 4100000,
+        baseTax: 346000,
+        rate: 0.30,
+        description: 'Rs. 346,000 + 30% of the amount exceeding Rs. 3,200,000',
+      },
+      {
+        min: 4100000,
+        max: null,
+        baseTax: 616000,
+        rate: 0.35,
+        description: 'Rs. 616,000 + 35% of the amount exceeding Rs. 4,100,000',
       },
     ],
     nonSalariedSlabs: [

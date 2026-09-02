@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
                   Pak Tax Calculator
                 </h1>
                 <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                  {TAX_YEARS_CONFIG[taxYear]?.label || 'FY 2025-26'}
+                  {TAX_YEARS_CONFIG[taxYear]?.label || 'FY 2026-27'}
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium">
@@ -59,6 +59,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onChange={(e) => setTaxYear(e.target.value as TaxYear)}
                 className="bg-white text-xs font-bold text-slate-800 rounded-md px-2.5 py-1.5 border border-slate-200 shadow-2xs focus:outline-hidden focus:ring-2 focus:ring-emerald-600 cursor-pointer"
               >
+                <option value="2026-2027">FY 2026-2027 (Tax Year 2027) — Current</option>
                 <option value="2025-2026">FY 2025-2026 (Tax Year 2026)</option>
                 <option value="2024-2025">FY 2024-2025 (Tax Year 2025)</option>
                 <option value="2023-2024">FY 2023-2024 (Tax Year 2024)</option>

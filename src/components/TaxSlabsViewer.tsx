@@ -29,15 +29,15 @@ export const TaxSlabsViewer: React.FC<TaxSlabsViewerProps> = ({
   const [testIncome, setTestIncome] = useState<number>(1800000); // 18 Lakh annual (1.5 Lakh/mo)
   const [showComparison, setShowComparison] = useState<boolean>(true);
 
-  const currentConfig = TAX_YEARS_CONFIG[taxYear] || TAX_YEARS_CONFIG['2025-2026'];
+  const currentConfig = TAX_YEARS_CONFIG[taxYear] || TAX_YEARS_CONFIG['2026-2027'];
   const slabs =
     taxpayerCategory === 'salaried'
       ? currentConfig.salariedSlabs
       : currentConfig.nonSalariedSlabs;
 
-  // FY 24-25 vs 25-26 comparison config
-  const config2425 = TAX_YEARS_CONFIG['2024-2025'];
+  // FY 25-26 vs 26-27 comparison config
   const config2526 = TAX_YEARS_CONFIG['2025-2026'];
+  const config2627 = TAX_YEARS_CONFIG['2026-2027'];
 
   return (
     <div className="space-y-6">
@@ -64,6 +64,7 @@ export const TaxSlabsViewer: React.FC<TaxSlabsViewerProps> = ({
               onChange={(e) => setTaxYear(e.target.value as TaxYear)}
               className="bg-slate-900 text-white text-xs font-bold px-3 py-2 rounded-lg border border-slate-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 cursor-pointer"
             >
+              <option value="2026-2027">FY 2026-2027 (Tax Year 2027) — Current</option>
               <option value="2025-2026">FY 2025-2026 (Tax Year 2026)</option>
               <option value="2024-2025">FY 2024-2025 (Tax Year 2025)</option>
               <option value="2023-2024">FY 2023-2024 (Tax Year 2024)</option>
@@ -213,16 +214,16 @@ export const TaxSlabsViewer: React.FC<TaxSlabsViewerProps> = ({
         )}
       </div>
 
-      {/* Side-by-Side Comparison between FY 2024-25 and FY 2025-26 */}
+      {/* Side-by-Side Comparison between FY 2025-26 and FY 2026-27 */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
               <TrendingDown className="w-4 h-4 text-emerald-600" />
-              FY 2024-2025 vs FY 2025-2026 Salaried Slabs Comparison
+              FY 2025-2026 vs FY 2026-2027 Salaried Slabs Comparison
             </h3>
             <p className="text-xs text-slate-500">
-              Key reforms in the latest Finance Act: 1% starting rate for 600k-1.2M, new brackets, and highest slab threshold raised to Rs. 7 Million.
+              Key reforms in the Finance Act 2026: four upper brackets cut (23%&rarr;20%, 30%&rarr;25%, 35%&rarr;29%, 35%&rarr;32%), the top-rate threshold raised from Rs. 4.1M to Rs. 7M, and the surcharge on the salaried class abolished.
             </p>
           </div>
 
@@ -236,14 +237,14 @@ export const TaxSlabsViewer: React.FC<TaxSlabsViewerProps> = ({
 
         {showComparison && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-            {/* FY 2024-25 Slabs */}
+            {/* FY 2025-26 Slabs */}
             <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
               <div className="bg-slate-800 text-white px-3.5 py-2 font-bold flex items-center justify-between">
-                <span>FY 2024-2025 (Previous Tax Year)</span>
-                <span className="text-[10px] text-slate-300">Finance Act 2024</span>
+                <span>FY 2025-2026 (Previous Tax Year)</span>
+                <span className="text-[10px] text-slate-300">Finance Act 2025</span>
               </div>
               <div className="p-3 space-y-2 bg-slate-50/50">
-                {config2425.salariedSlabs.map((s, i) => (
+                {config2526.salariedSlabs.map((s, i) => (
                   <div key={i} className="flex items-center justify-between py-1 border-b border-slate-200/60 last:border-0">
                     <span className="text-slate-700 font-mono">
                       {s.min === 0 ? 'Up to 600k' : s.max ? `${s.min / 100000}L - ${s.max / 100000}L` : `Above ${s.min / 100000}L`}
@@ -256,14 +257,14 @@ export const TaxSlabsViewer: React.FC<TaxSlabsViewerProps> = ({
               </div>
             </div>
 
-            {/* FY 2025-26 Slabs */}
+            {/* FY 2026-27 Slabs */}
             <div className="border border-emerald-300 rounded-xl overflow-hidden text-xs shadow-2xs">
               <div className="bg-emerald-800 text-white px-3.5 py-2 font-bold flex items-center justify-between">
-                <span>FY 2025-2026 (Current Tax Year)</span>
+                <span>FY 2026-2027 (Current Tax Year)</span>
                 <span className="text-[10px] bg-emerald-600 px-1.5 py-0.5 rounded text-emerald-100 font-bold">Relief Slabs</span>
               </div>
               <div className="p-3 space-y-2 bg-emerald-50/40">
-                {config2526.salariedSlabs.map((s, i) => (
+                {config2627.salariedSlabs.map((s, i) => (
                   <div key={i} className="flex items-center justify-between py-1 border-b border-emerald-100 last:border-0">
                     <span className="text-emerald-950 font-mono font-medium">
                       {s.min === 0 ? 'Up to 600k' : s.max ? `${s.min / 100000}L - ${s.max / 100000}L` : `Above ${s.min / 100000}L`}
