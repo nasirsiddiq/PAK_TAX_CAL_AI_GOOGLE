@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { Header } from './components/Header';
 import { AuthModal } from './components/AuthModal';
-import { SalaryTaxCalculator } from './components/SalaryTaxCalculator';
-import { InvoiceTaxCalculator } from './components/InvoiceTaxCalculator';
-import { ProvincialTaxCalculator } from './components/ProvincialTaxCalculator';
-import { SpecializedCalculators } from './components/SpecializedCalculators';
-import { PtaMobileTaxCalculator } from './components/PtaMobileTaxCalculator';
 import { PayslipTaxCertificateModal } from './components/PayslipTaxCertificateModal';
-import { TaxFaqSection } from './components/TaxFaqSection';
-import ZakatCalculator from './components/ZakatCalculator';
-import CalculationHistory from './components/CalculationHistory';
+// Each tax calculator tab is code-split so the browser only downloads the
+// calculator the visitor is actually looking at, instead of all of them
+// up front on first load.
+const SalaryTaxCalculator = lazy(() => import('./components/SalaryTaxCalculator').then((m) => ({ default: m.SalaryTaxCalculator })));
+const InvoiceTaxCalculator = lazy(() => import('./components/InvoiceTaxCalculator').then((m) => ({ default: m.InvoiceTaxCalculator })));
+const ProvincialTaxCalculator = lazy(() => import('./components/ProvincialTaxCalculator').then((m) => ({ default: m.ProvincialTaxCalculator })));
+const SpecializedCalculators = lazy(() => import('./components/SpecializedCalculators').then((m) => ({ default: m.SpecializedCalculators })));
+const PtaMobileTaxCalculator = lazy(() => import('./components/PtaMobileTaxCalculator').then((m) => ({ default: m.PtaMobileTaxCalculator })));
+const TaxFaqSection = lazy(() => import('./components/TaxFaqSection').then((m) => ({ default: m.TaxFaqSection })));
+const ZakatCalculator = lazy(() => import('./components/ZakatCalculator'));
+const CalculationHistory = lazy(() => import('./components/CalculationHistory'));
 import { TaxpayerCategory, TaxYear } from './types/tax';
 import { calculateIncomeTax } from './utils/taxCalculator';
 import { buildCalculatorUrl, getTabFromPathname, type AppTab } from './utils/subdomainRoutes';
@@ -102,6 +105,17 @@ function setMetaTag(attribute: 'name' | 'property', value: string, content: stri
     document.head.appendChild(element);
   }
   element.content = content;
+}
+
+function CalculatorLoadingFallback() {
+  return (
+    <div className="flex items-center justify-center py-24">
+      <div className="flex items-center gap-3 text-slate-500">
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+        <span className="text-sm font-semibold">Loading calculator&hellip;</span>
+      </div>
+    </div>
+  );
 }
 
 function setCalculatorStructuredData(title: string, description: string, url: string) {
@@ -273,6 +287,7 @@ export default function App() {
         </div>}
 
         <div id="active-calculator-content">
+        <Suspense fallback={<CalculatorLoadingFallback />}>
         {activeTab === 'calculator' && (
           <SalaryTaxCalculator
             taxYear={taxYear}
@@ -308,11 +323,13 @@ export default function App() {
         {activeTab === 'it-export-tax' && <SpecializedCalculators initialTab="it-export" />}
 
         {activeTab === 'pta-mobile-tax' && <PtaMobileTaxCalculator />}
-
+        </Suspense>
         </div>
 
         {/* Global Compliance & FAQ Section */}
-        <TaxFaqSection activeTab={activeTab} />
+        <Suspense fallback={null}>
+          <TaxFaqSection activeTab={activeTab} />
+        </Suspense>
       </main>
 
       {/* Printable Salary Slip / Tax Certificate Modal */}

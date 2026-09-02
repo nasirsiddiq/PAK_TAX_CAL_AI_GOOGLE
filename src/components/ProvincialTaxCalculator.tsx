@@ -492,6 +492,26 @@ export const ProvincialTaxCalculator: React.FC<ProvincialTaxCalculatorProps> = (
               )}
             </div>
 
+            {/* Invoice Amount Input */}
+            <div className="space-y-1.5 rounded-xl border-2 border-red-400 bg-red-50 p-3">
+              <label className="text-sm font-extrabold text-red-900">
+                Enter Service Amount Here (PKR)
+              </label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-red-400 font-bold text-xs">Rs.</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={isInvoiceAmountFocused ? (invoiceAmount || '') : formatPKR(invoiceAmount, { showPrefix: false })}
+                  onFocus={() => setIsInvoiceAmountFocused(true)}
+                  onBlur={() => setIsInvoiceAmountFocused(false)}
+                  onChange={(e) => setInvoiceAmount(Math.max(0, Number(e.target.value.replace(/[^0-9]/g, '')) || 0))}
+                  placeholder="Enter amount, e.g. 100000"
+                  className="w-full pl-10 pr-3 py-3 bg-white border-2 border-red-500 rounded-xl text-lg font-bold text-slate-900 font-mono focus:ring-2 focus:ring-red-300"
+                />
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-700">Supplier Name</label>
@@ -515,26 +535,6 @@ export const ProvincialTaxCalculator: React.FC<ProvincialTaxCalculatorProps> = (
                 </select>
               </div>
               <button type="button" onClick={saveInvoiceDetails} className="sm:col-span-2 justify-self-start rounded-lg bg-emerald-800 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700">Save Invoice Details</button>
-            </div>
-
-            {/* Invoice Amount Input */}
-            <div className="space-y-1.5 rounded-xl border-2 border-emerald-300 bg-emerald-50/50 p-3">
-              <label className="text-sm font-extrabold text-emerald-950">
-                Enter Service Amount Here (PKR)
-              </label>
-              <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Rs.</span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={isInvoiceAmountFocused ? (invoiceAmount || '') : formatPKR(invoiceAmount, { showPrefix: false })}
-                  onFocus={() => setIsInvoiceAmountFocused(true)}
-                  onBlur={() => setIsInvoiceAmountFocused(false)}
-                  onChange={(e) => setInvoiceAmount(Math.max(0, Number(e.target.value.replace(/[^0-9]/g, '')) || 0))}
-                  placeholder="Enter amount, e.g. 100000"
-                  className="w-full pl-10 pr-3 py-3 bg-white border-2 border-emerald-500 rounded-xl text-lg font-bold text-slate-900 font-mono focus:ring-2 focus:ring-emerald-600"
-                />
-              </div>
             </div>
 
             {/* Payment Method / POS Digital Rate */}
@@ -705,19 +705,6 @@ export const ProvincialTaxCalculator: React.FC<ProvincialTaxCalculatorProps> = (
               )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <input value={supplierName} onChange={(event) => setSupplierName(event.target.value)} placeholder="Supplier name" aria-label="Supplier name" className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900" />
-              <input value={invoiceNumber} onChange={(event) => setInvoiceNumber(event.target.value)} placeholder="Invoice number" aria-label="Invoice number" className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900" />
-              <input type="date" value={invoiceDate} onChange={(event) => setInvoiceDate(event.target.value)} aria-label="Invoice date" className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900" />
-              <select value={paymentMode} onChange={(event) => setPaymentMode(event.target.value)} aria-label="Payment mode" className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-900">
-                <option value="bank-transfer">Bank Transfer</option>
-                <option value="cash">Cash</option>
-                <option value="card">Card / POS</option>
-                <option value="cheque">Cheque</option>
-              </select>
-              <button type="button" onClick={saveInvoiceDetails} className="sm:col-span-2 justify-self-start rounded-lg bg-emerald-800 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700">Save Invoice Details</button>
-            </div>
-
             <div className="flex flex-col gap-1 rounded-xl border border-emerald-200 bg-emerald-50 p-2.5 sm:flex-row sm:items-center sm:justify-start">
               <label htmlFor="supplier-registration-status" className="text-xs font-bold text-emerald-900">Supplier Status:</label>
               <select
@@ -732,19 +719,19 @@ export const ProvincialTaxCalculator: React.FC<ProvincialTaxCalculatorProps> = (
             </div>
 
             {/* Invoice Amount from Supplier */}
-            <div className="space-y-1 border-t border-slate-100 pt-2">
+            <div className="space-y-1 rounded-xl border-2 border-red-400 bg-red-50 p-2.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-slate-800">
-                  {isSupplierRegistered 
-                    ? 'Invoice Base Amount (Excl. Tax) - PKR:' 
+                <label className="text-xs font-bold text-red-900">
+                  {isSupplierRegistered
+                    ? 'Invoice Base Amount (Excl. Tax) - PKR:'
                     : 'Invoice Total Amount (Incl. Tax) - PKR:'}
                 </label>
-                <span className="text-xs font-bold text-emerald-800 font-mono">
+                <span className="text-xs font-bold text-red-800 font-mono">
                   {formatPakistaniUnits(invoiceAmount)}
                 </span>
               </div>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Rs.</span>
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-red-400 font-bold text-xs">Rs.</span>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -752,14 +739,27 @@ export const ProvincialTaxCalculator: React.FC<ProvincialTaxCalculatorProps> = (
                   onFocus={() => setIsInvoiceAmountFocused(true)}
                   onBlur={() => setIsInvoiceAmountFocused(false)}
                   onChange={(e) => setInvoiceAmount(Math.max(0, Number(e.target.value.replace(/[^0-9]/g, '')) || 0))}
-                  className="w-full pl-10 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 font-mono focus:bg-white focus:ring-2 focus:ring-emerald-600"
+                  className="w-full pl-10 pr-3 py-2 bg-white border-2 border-red-500 rounded-xl text-sm font-bold text-slate-900 font-mono focus:bg-white focus:ring-2 focus:ring-red-300"
                 />
               </div>
               <p className="text-[11px] text-slate-500 italic pt-1">
-                {isSupplierRegistered 
-                  ? 'Enter the amount BEFORE tax is added (tax will be calculated and shown separately)' 
+                {isSupplierRegistered
+                  ? 'Enter the amount BEFORE tax is added (tax will be calculated and shown separately)'
                   : 'Enter the amount AFTER tax is included (tax will be extracted from this total)'}
               </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <input value={supplierName} onChange={(event) => setSupplierName(event.target.value)} placeholder="Supplier name" aria-label="Supplier name" className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900" />
+              <input value={invoiceNumber} onChange={(event) => setInvoiceNumber(event.target.value)} placeholder="Invoice number" aria-label="Invoice number" className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900" />
+              <input type="date" value={invoiceDate} onChange={(event) => setInvoiceDate(event.target.value)} aria-label="Invoice date" className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900" />
+              <select value={paymentMode} onChange={(event) => setPaymentMode(event.target.value)} aria-label="Payment mode" className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-900">
+                <option value="bank-transfer">Bank Transfer</option>
+                <option value="cash">Cash</option>
+                <option value="card">Card / POS</option>
+                <option value="cheque">Cheque</option>
+              </select>
+              <button type="button" onClick={saveInvoiceDetails} className="sm:col-span-2 justify-self-start rounded-lg bg-emerald-800 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700">Save Invoice Details</button>
             </div>
 
           </div>

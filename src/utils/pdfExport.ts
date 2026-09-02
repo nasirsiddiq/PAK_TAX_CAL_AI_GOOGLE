@@ -1,5 +1,6 @@
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+// jsPDF and html2canvas are large libraries only needed when a user actually
+// clicks "Save PDF" — importing them dynamically (below) keeps them out of
+// the initial page bundle entirely.
 
 export interface PDFExportOptions {
   filename?: string;
@@ -32,6 +33,12 @@ export async function exportToPDF(
     if (!element) {
       throw new Error(`Element with ID "${elementId}" not found`);
     }
+
+    // Loaded on demand so these two libraries never ship in the initial page bundle.
+    const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+      import('jspdf'),
+      import('html2canvas'),
+    ]);
 
     // Capture the element as a canvas
     const canvas = await html2canvas(element, {

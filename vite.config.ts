@@ -5,7 +5,9 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: process.env.GITHUB_ACTIONS ? '/PAK_TAX_CAL_AI_GOOGLE/' : '/',
+    // Relative base so built asset URLs resolve correctly whether the app is
+    // hosted at a domain root (Netlify) or a subpath (GitHub Pages).
+    base: './',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
