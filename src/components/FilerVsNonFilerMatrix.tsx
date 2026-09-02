@@ -240,7 +240,6 @@ export const FilerVsNonFilerMatrix: React.FC = () => {
                 <th className="py-2.5 px-3.5">Transaction Type</th>
                 <th className="py-2.5 px-3.5">Category</th>
                 <th className="py-2.5 px-3.5 text-emerald-800 bg-emerald-50/50">Active Filer Rate</th>
-                <th className="py-2.5 px-3.5 text-amber-800 bg-amber-50/50">Late Filer Rate</th>
                 <th className="py-2.5 px-3.5 text-rose-800 bg-rose-50/50">Non-Filer Rate</th>
                 <th className="py-2.5 px-3.5">Statutory Rules & Treatment</th>
               </tr>
@@ -262,9 +261,6 @@ export const FilerVsNonFilerMatrix: React.FC = () => {
                     </td>
                     <td className="py-3 px-3.5 font-mono font-bold text-emerald-700 bg-emerald-50/30 whitespace-nowrap">
                       {item.filerRate}
-                    </td>
-                    <td className="py-3 px-3.5 font-mono font-semibold text-amber-700 bg-amber-50/30 whitespace-nowrap">
-                      {item.lateFilerRate}
                     </td>
                     <td className="py-3 px-3.5 font-mono font-bold text-rose-600 bg-rose-50/30 whitespace-nowrap">
                       {item.nonFilerRate}

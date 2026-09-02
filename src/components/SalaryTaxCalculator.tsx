@@ -3,11 +3,9 @@ import {
   Calculator,
   ChevronDown,
   ChevronUp,
-  DollarSign,
   Info,
   Layers,
   Sparkles,
-  ArrowRight,
   ShieldCheck,
   CheckCircle2,
   Copy,
@@ -27,6 +25,7 @@ import {
 } from '../types/tax';
 import { calculateIncomeTax, formatPakistaniUnits, formatPKR } from '../utils/taxCalculator';
 import { TAX_YEARS_CONFIG } from '../data/taxSlabs';
+import { SocialShareButtons } from './SocialShareButtons';
 
 interface SalaryTaxCalculatorProps {
   taxYear: TaxYear;
@@ -34,7 +33,6 @@ interface SalaryTaxCalculatorProps {
   taxpayerCategory: TaxpayerCategory;
   setTaxpayerCategory: (cat: TaxpayerCategory) => void;
   onOpenCertificate: () => void;
-  onNavigateToOptimizer: () => void;
 }
 
 const PRESET_SALARIES_MONTHLY = [
@@ -55,7 +53,6 @@ export const SalaryTaxCalculator: React.FC<SalaryTaxCalculatorProps> = ({
   taxpayerCategory,
   setTaxpayerCategory,
   onOpenCertificate,
-  onNavigateToOptimizer,
 }) => {
   const [period, setPeriod] = useState<CalculationPeriod>('monthly');
   const [useDetailedBreakdown, setUseDetailedBreakdown] = useState(false);
@@ -204,6 +201,29 @@ Calculated via Pak Tax Calculator`;
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-2.5 shadow-2xs">
+        <span className="px-1 text-xs font-bold text-slate-600">Taxpayer type:</span>
+        {([
+          ['salaried', 'Salaried Individual'],
+          ['non_salaried', 'Business / Non-Salaried'],
+          ['aop', 'AOP'],
+          ['it_freelance_export', 'IT / Freelancer Export'],
+        ] as const).map(([category, label]) => (
+          <button
+            key={category}
+            type="button"
+            onClick={() => setTaxpayerCategory(category)}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer ${
+              taxpayerCategory === category
+                ? 'bg-emerald-800 text-white shadow-2xs'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       {/* Main Grid: Inputs Column vs Results Column */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Inputs (5 Cols on large screens) */}
@@ -212,7 +232,7 @@ Calculated via Pak Tax Calculator`;
             {/* Header & Period Toggle */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-emerald-600" />
+                <Calculator className="w-4 h-4 text-emerald-600" />
                 Income Details
               </h3>
 
@@ -308,17 +328,22 @@ Calculated via Pak Tax Calculator`;
 
             {/* Primary Gross Input */}
             {!useDetailedBreakdown ? (
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="gross-salary-input" className="text-xs font-bold text-slate-800">
-                    {period === 'monthly' ? 'Monthly Gross Salary / Income' : 'Annual Gross Salary / Income'} (PKR)
-                  </label>
-                  <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+              <div className="space-y-2 rounded-2xl border-2 border-emerald-200 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 p-3.5 shadow-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex-1">
+                    <div className="mb-1 inline-flex items-center rounded-full border border-emerald-300 bg-emerald-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-900">
+                      Enter your income
+                    </div>
+                    <div className="text-sm font-bold text-slate-800">
+                      {period === 'monthly' ? 'Monthly Gross Salary / Income' : 'Annual Gross Salary / Income'} (PKR)
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-800 bg-white px-2.5 py-1 rounded-lg border border-emerald-200 shadow-xs">
                     {formatPakistaniUnits(inputState.grossSalary)}
                   </span>
                 </div>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-700 font-black text-base">
                     Rs.
                   </span>
                   <input
@@ -329,10 +354,10 @@ Calculated via Pak Tax Calculator`;
                     value={inputState.grossSalary || ''}
                     onChange={(e) => handleInputChange('grossSalary', Math.max(0, Number(e.target.value)))}
                     placeholder="Enter amount (e.g. 150000)"
-                    className="w-full pl-12 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base font-bold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 transition-all font-mono"
+                    className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-emerald-300 rounded-xl text-lg font-black text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-hidden focus:ring-4 focus:ring-emerald-200 focus:border-emerald-600 transition-all font-mono shadow-sm"
                   />
                 </div>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[11px] text-slate-600">
                   Equivalent to {formatPKR(period === 'monthly' ? inputState.grossSalary * 12 : inputState.grossSalary / 12)} {period === 'monthly' ? 'per year' : 'per month'}
                 </p>
               </div>
@@ -813,16 +838,6 @@ Calculated via Pak Tax Calculator`;
             <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
               <button
                 type="button"
-                onClick={onNavigateToOptimizer}
-                className="text-xs font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1.5 cursor-pointer"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                Explore ways to reduce tax legally (VPS / Donations)
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-
-              <button
-                type="button"
                 onClick={onOpenCertificate}
                 className="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-800 transition-all flex items-center gap-1.5 cursor-pointer"
               >
@@ -833,6 +848,16 @@ Calculated via Pak Tax Calculator`;
           </div>
         </div>
       </div>
+
+      {/* Social Sharing Section */}
+      <SocialShareButtons
+        title="Pakistan Salary Tax Calculator"
+        description={`My tax calculation for ${TAX_YEARS_CONFIG[taxYear]?.label}: Monthly take-home is ${formatPKR(result.netTakeHomeMonthly)}, Annual tax liability is ${formatPKR(result.netTaxAnnual)} at ${result.effectiveTaxRate.toFixed(2)}% effective rate.`}
+        calculatorType="salary-tax"
+        amount={`${formatPKR(result.netTakeHomeMonthly)}/month (${formatPKR(result.netTakeHomeAnnual)}/year)`}
+      />
     </div>
   );
 };
+
+export default SalaryTaxCalculator;

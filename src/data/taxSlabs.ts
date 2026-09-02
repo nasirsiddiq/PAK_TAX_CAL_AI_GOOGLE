@@ -425,7 +425,6 @@ export interface WhtMatrixItem {
   transaction: string;
   category: string;
   filerRate: string;
-  lateFilerRate: string;
   nonFilerRate: string;
   notes: string;
 }
@@ -437,7 +436,6 @@ export const WHT_MATRIX: WhtMatrixItem[] = [
     transaction: 'Salary Income Withholding',
     category: 'Income',
     filerRate: 'As per Salaried Slabs',
-    lateFilerRate: 'As per Salaried Slabs',
     nonFilerRate: 'As per Salaried Slabs',
     notes: 'Deducted monthly by employer on estimated annual income',
   },
@@ -447,7 +445,6 @@ export const WHT_MATRIX: WhtMatrixItem[] = [
     transaction: 'Purchase / Transfer of Immovable Property',
     category: 'Real Estate',
     filerRate: '3%',
-    lateFilerRate: '6% - 7%',
     nonFilerRate: '12% - 15%',
     notes: 'Advance tax adjustable against annual tax liability',
   },
@@ -457,7 +454,6 @@ export const WHT_MATRIX: WhtMatrixItem[] = [
     transaction: 'Sale / Transfer of Immovable Property',
     category: 'Real Estate',
     filerRate: '3%',
-    lateFilerRate: '6%',
     nonFilerRate: '10%',
     notes: 'Adjustable advance tax paid by seller at time of transfer',
   },
@@ -467,7 +463,6 @@ export const WHT_MATRIX: WhtMatrixItem[] = [
     transaction: 'IT & IT-Enabled Services Export Remittance',
     category: 'Freelance & IT',
     filerRate: '0.25% (PSEB registered)',
-    lateFilerRate: '1%',
     nonFilerRate: '1% - Normal Slabs',
     notes: 'Final tax regime upon filing required statement and PSEB registration',
   },
@@ -477,7 +472,6 @@ export const WHT_MATRIX: WhtMatrixItem[] = [
     transaction: 'Cash Withdrawal from Bank (exceeding Rs. 50k/day)',
     category: 'Banking',
     filerRate: '0%',
-    lateFilerRate: '0.6%',
     nonFilerRate: '0.6%',
     notes: 'Exempt for active filers on ATL',
   },
@@ -487,7 +481,6 @@ export const WHT_MATRIX: WhtMatrixItem[] = [
     transaction: 'Banking Non-Cash Transactions / Online / Cheques',
     category: 'Banking',
     filerRate: '0%',
-    lateFilerRate: '0.6%',
     nonFilerRate: '0.6%',
     notes: 'Non-filers charged on inter-bank transfers above Rs. 50,000/day',
   },
@@ -497,7 +490,6 @@ export const WHT_MATRIX: WhtMatrixItem[] = [
     transaction: 'Dividend Income (Stocks / Mutual Funds)',
     category: 'Investments',
     filerRate: '15%',
-    lateFilerRate: '30%',
     nonFilerRate: '30%',
     notes: '25% for power companies, 15% standard for filers',
   },
@@ -507,7 +499,6 @@ export const WHT_MATRIX: WhtMatrixItem[] = [
     transaction: 'Profit on Debt / Bank Savings Accounts',
     category: 'Banking',
     filerRate: '15%',
-    lateFilerRate: '30%',
     nonFilerRate: '35%',
     notes: 'Deducted directly by bank at source',
   },
@@ -517,7 +508,6 @@ export const WHT_MATRIX: WhtMatrixItem[] = [
     transaction: 'Motor Vehicle Purchase / Registration (under 850cc)',
     category: 'Vehicles',
     filerRate: 'Rs. 10,000',
-    lateFilerRate: 'Rs. 20,000',
     nonFilerRate: 'Rs. 30,000 - 3x',
     notes: 'Scales progressively with engine displacement up to 3000cc+',
   },
@@ -527,7 +517,6 @@ export const WHT_MATRIX: WhtMatrixItem[] = [
     transaction: 'Motor Vehicle Transfer (Ownership within 5 years)',
     category: 'Vehicles',
     filerRate: 'Standard Fixed',
-    lateFilerRate: '2x Fixed',
     nonFilerRate: '3x - 4x Fixed',
     notes: 'Reduced by 10% for each subsequent year after purchase',
   },
@@ -537,7 +526,6 @@ export const WHT_MATRIX: WhtMatrixItem[] = [
     transaction: 'Prize on Prize Bonds / Lottery / Raffle',
     category: 'Investments',
     filerRate: '15%',
-    lateFilerRate: '30%',
     nonFilerRate: '30%',
     notes: 'Final tax deducted on winning prize payout',
   },
@@ -547,7 +535,6 @@ export const WHT_MATRIX: WhtMatrixItem[] = [
     transaction: 'Commercial & Domestic Electricity Bill (> Rs. 25,000)',
     category: 'Utilities',
     filerRate: '0% (Domestic)',
-    lateFilerRate: '7.5%',
     nonFilerRate: '7.5%',
     notes: 'Charged to non-filers on domestic bills exceeding Rs. 25k/month',
   },

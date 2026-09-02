@@ -1,1 +1,20 @@
 @import "tailwindcss";
+
+@media print {
+	body > #root > div > header,
+	body > #root > div > footer,
+	#pak-tax-page-content > :not(#active-calculator-content),
+	#pak-tax-page-content + div,
+	#active-calculator-content > div > :not(#provincial-service-tax-print),
+	#provincial-service-tax-print > :first-child {
+		display: none !important;
+	}
+
+	#pak-tax-page-content,
+	#active-calculator-content,
+	#provincial-service-tax-print {
+		display: block !important;
+		max-width: none !important;
+		padding: 0 !important;
+	}
+}
