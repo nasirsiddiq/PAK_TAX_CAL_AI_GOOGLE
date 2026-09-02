@@ -224,18 +224,8 @@ Calculated via Pak Tax Calculator`;
         ))}
       </div>
 
-      {/* Main Grid: Inputs Column vs Results Column */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Inputs (5 Cols on large screens) */}
-        <div className="lg:col-span-5 space-y-5">
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-5">
-            {/* Header & Period Toggle */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Calculator className="w-4 h-4 text-emerald-600" />
-                Income Details
-              </h3>
-
+                 {/* Period Toggle */}
+            <div className="flex items-center justify-end pb-3 border-b border-slate-100">
               {/* Period Switcher */}
               <div className="inline-flex p-1 bg-slate-100 rounded-lg border border-slate-200">
                 <button
