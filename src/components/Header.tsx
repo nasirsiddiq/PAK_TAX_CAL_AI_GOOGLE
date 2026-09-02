@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Calculator, Clock, Home, Landmark, LogIn, ShoppingCart, TrendingDown, TrendingUp, UserPlus } from 'lucide-react';
+import React from 'react';
+import { Calculator, Clock, FileStack, Home, Landmark, LogIn, RefreshCw, Scale, ShieldCheck, ShoppingCart, Sparkles, TrendingDown, TrendingUp, UserPlus } from 'lucide-react';
 import { TaxYear } from '../types/tax';
 import { TAX_YEARS_CONFIG } from '../data/taxSlabs';
 import type { AppTab } from '../utils/subdomainRoutes';
@@ -23,29 +23,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAuth,
   onOpenSignUp,
 }) => {
-  const [hidden, setHidden] = useState(false);
-  const lastScrollY = useRef(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const scrolledDown = currentScrollY > lastScrollY.current;
-      const pastThreshold = currentScrollY > 96;
-
-      setHidden(scrolledDown && pastThreshold);
-      lastScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
-    <header
-      className={`bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs transition-transform duration-300 ${
-        hidden ? '-translate-y-full' : 'translate-y-0'
-      }`}
-    >
+    <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
       {/* Main Header Brand & Core Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -188,12 +167,57 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           <button
+            id="tab-invoice-withholding"
+            onClick={() => setActiveTab('invoice-withholding')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'invoice-withholding' ? 'bg-emerald-800 text-white shadow-sm ring-1 ring-emerald-900' : 'bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200/80'}`}
+          >
+            <FileStack className="w-4 h-4 text-emerald-600" />
+            <span>8. Invoice Withholding (All in One)</span>
+          </button>
+
+          <button
+            id="tab-reverse"
+            onClick={() => setActiveTab('reverse')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'reverse' ? 'bg-emerald-800 text-white shadow-sm ring-1 ring-emerald-900' : 'bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200/80'}`}
+          >
+            <RefreshCw className="w-4 h-4 text-emerald-600" />
+            <span>9. Net to Gross</span>
+          </button>
+
+          <button
+            id="tab-tax-slabs"
+            onClick={() => setActiveTab('tax-slabs')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'tax-slabs' ? 'bg-emerald-800 text-white shadow-sm ring-1 ring-emerald-900' : 'bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200/80'}`}
+          >
+            <Scale className="w-4 h-4 text-emerald-600" />
+            <span>10. Tax Slabs</span>
+          </button>
+
+          <button
+            id="tab-filer-vs-nonfiler"
+            onClick={() => setActiveTab('filer-vs-nonfiler')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'filer-vs-nonfiler' ? 'bg-emerald-800 text-white shadow-sm ring-1 ring-emerald-900' : 'bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200/80'}`}
+          >
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <span>11. Filer vs Non-Filer</span>
+          </button>
+
+          <button
+            id="tab-tax-savings"
+            onClick={() => setActiveTab('tax-savings')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'tax-savings' ? 'bg-emerald-800 text-white shadow-sm ring-1 ring-emerald-900' : 'bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200/80'}`}
+          >
+            <Sparkles className="w-4 h-4 text-emerald-600" />
+            <span>12. Tax Savings</span>
+          </button>
+
+          <button
             id="tab-zakat"
             onClick={() => setActiveTab('zakat')}
             className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'zakat' ? 'bg-emerald-800 text-white shadow-sm ring-1 ring-emerald-900' : 'bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200/80'}`}
           >
             <Home className="w-4 h-4 text-emerald-600" />
-            <span>9. Zakat Calculator</span>
+            <span>13. Zakat Calculator</span>
           </button>
 
           <button
@@ -202,7 +226,7 @@ export const Header: React.FC<HeaderProps> = ({
             className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'history' ? 'bg-emerald-800 text-white shadow-sm ring-1 ring-emerald-900' : 'bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200/80'}`}
           >
             <Clock className="w-4 h-4 text-emerald-600" />
-            <span>10. My Account</span>
+            <span>14. My Account</span>
           </button>
         </nav>
       </div>

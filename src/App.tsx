@@ -7,12 +7,21 @@ import { PayslipTaxCertificateModal } from './components/PayslipTaxCertificateMo
 // up front on first load.
 const SalaryTaxCalculator = lazy(() => import('./components/SalaryTaxCalculator').then((m) => ({ default: m.SalaryTaxCalculator })));
 const InvoiceTaxCalculator = lazy(() => import('./components/InvoiceTaxCalculator').then((m) => ({ default: m.InvoiceTaxCalculator })));
+const InvoiceWithholdingAllInOne = lazy(() => import('./components/InvoiceWithholdingAllInOne'));
 const ProvincialTaxCalculator = lazy(() => import('./components/ProvincialTaxCalculator').then((m) => ({ default: m.ProvincialTaxCalculator })));
 const SpecializedCalculators = lazy(() => import('./components/SpecializedCalculators').then((m) => ({ default: m.SpecializedCalculators })));
 const PtaMobileTaxCalculator = lazy(() => import('./components/PtaMobileTaxCalculator').then((m) => ({ default: m.PtaMobileTaxCalculator })));
 const TaxFaqSection = lazy(() => import('./components/TaxFaqSection').then((m) => ({ default: m.TaxFaqSection })));
 const ZakatCalculator = lazy(() => import('./components/ZakatCalculator'));
 const CalculationHistory = lazy(() => import('./components/CalculationHistory'));
+const ReverseTaxCalculator = lazy(() => import('./components/ReverseTaxCalculator').then((m) => ({ default: m.ReverseTaxCalculator })));
+const TaxSlabsViewer = lazy(() => import('./components/TaxSlabsViewer').then((m) => ({ default: m.TaxSlabsViewer })));
+const FilerVsNonFilerMatrix = lazy(() => import('./components/FilerVsNonFilerMatrix').then((m) => ({ default: m.FilerVsNonFilerMatrix })));
+const TaxSavingsOptimizer = lazy(() => import('./components/TaxSavingsOptimizer').then((m) => ({ default: m.TaxSavingsOptimizer })));
+const AboutPage = lazy(() => import('./components/AboutPage'));
+const ContactPage = lazy(() => import('./components/ContactPage'));
+const PrivacyPage = lazy(() => import('./components/PrivacyPage'));
+const FeedbackPage = lazy(() => import('./components/FeedbackPage'));
 import { TaxpayerCategory, TaxYear } from './types/tax';
 import { calculateIncomeTax } from './utils/taxCalculator';
 import { buildCalculatorUrl, getTabFromPathname, type AppTab } from './utils/subdomainRoutes';
@@ -95,7 +104,51 @@ const PAGE_SEO: Record<AppTab, { title: string; description: string; keywords: s
     description: 'Calculate provincial professional tax in Pakistan for salaried individuals, businesses, and companies.',
     keywords: 'professional tax calculator Pakistan, Punjab professional tax, provincial professional tax',
   },
+  'invoice-withholding': {
+    title: 'Invoice Withholding Calculator | All in One | GST and WHT',
+    description: 'Calculate Section 153 income tax withholding, GST, and optional provincial sales tax on services on a single invoice, all in one place.',
+    keywords: 'invoice withholding calculator Pakistan, all in one withholding calculator, Section 153 calculator, GST and WHT calculator, provincial sales tax withholding',
+  },
+  'tax-slabs': {
+    title: 'Pakistan FBR Income Tax Slabs 2025-26',
+    description: 'View and compare official FBR income tax slabs for salaried and non-salaried individuals across recent tax years.',
+    keywords: 'FBR tax slabs, Pakistan income tax slabs 2025-26, salaried tax slabs, non-salaried tax slabs, tax bracket Pakistan',
+  },
+  'filer-vs-nonfiler': {
+    title: 'Filer vs Non-Filer Withholding Tax Rates Pakistan',
+    description: 'Compare active taxpayer (filer) and non-filer withholding tax rates in Pakistan across property, vehicles, banking and investments.',
+    keywords: 'filer vs non-filer Pakistan, ATL rates, non-filer tax rate, active taxpayer list, withholding tax matrix Pakistan',
+  },
+  'tax-savings': {
+    title: 'Pakistan Tax Savings and Deductions Optimizer',
+    description: 'See how VPS pension contributions, charitable donations, and health insurance legally reduce your Pakistan income tax liability.',
+    keywords: 'tax savings calculator Pakistan, VPS pension tax credit, Section 61 donations, Section 62 tax credit, reduce income tax Pakistan',
+  },
+  about: {
+    title: 'About Us | Pak Tax Calculator',
+    description: 'Learn about paktaxcalculator.net, a free independent tool for estimating Pakistan income tax, GST, withholding tax and provincial taxes.',
+    keywords: 'about pak tax calculator, Pakistan tax calculator website',
+  },
+  contact: {
+    title: 'Contact Us | Pak Tax Calculator',
+    description: 'Get in touch with paktaxcalculator.net about corrections, partnerships, media enquiries or general questions.',
+    keywords: 'contact pak tax calculator, Pakistan tax calculator contact',
+  },
+  privacy: {
+    title: 'Privacy Policy | Pak Tax Calculator',
+    description: 'Read the privacy policy for paktaxcalculator.net, including what data is and is not collected when you use the calculators.',
+    keywords: 'privacy policy pak tax calculator, Pakistan tax calculator privacy',
+  },
+  feedback: {
+    title: 'Feedback | Pak Tax Calculator',
+    description: 'Report an outdated tax rate, a bug, or suggest a new calculator for paktaxcalculator.net.',
+    keywords: 'feedback pak tax calculator, report tax rate error, suggest calculator',
+  },
 };
+
+// Plain informational pages — no calculator to print/export as PDF, and no
+// tax FAQ relevant to show underneath them.
+const CONTENT_PAGE_TABS = new Set<AppTab>(['about', 'contact', 'privacy', 'feedback']);
 
 function setMetaTag(attribute: 'name' | 'property', value: string, content: string) {
   let element = document.querySelector(`meta[${attribute}="${value}"]`) as HTMLMetaElement | null;
@@ -269,7 +322,7 @@ export default function App() {
 
       {/* Main Content Area */}
       <main id="pak-tax-page-content" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 pb-28 sm:py-8 sm:pb-32 space-y-8 print:shadow-none">
-        {activeTab !== 'provincial' && <div className="flex justify-end gap-3 print:hidden">
+        {activeTab !== 'provincial' && !CONTENT_PAGE_TABS.has(activeTab) && <div className="flex justify-end gap-3 print:hidden">
           <button
             onClick={handlePrintPage}
             className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
@@ -310,6 +363,31 @@ export default function App() {
 
         {activeTab === 'invoice-tax' && <InvoiceTaxCalculator onPrint={handlePrintPage} onSavePdf={handleSavePdf} />}
 
+        {activeTab === 'invoice-withholding' && <InvoiceWithholdingAllInOne onPrint={handlePrintPage} onSavePdf={handleSavePdf} />}
+
+        {activeTab === 'reverse' && (
+          <ReverseTaxCalculator
+            taxYear={taxYear}
+            setTaxYear={setTaxYear}
+            taxpayerCategory={taxpayerCategory}
+            setTaxpayerCategory={setTaxpayerCategory}
+            onOpenCertificate={() => setIsCertificateModalOpen(true)}
+          />
+        )}
+
+        {activeTab === 'tax-slabs' && (
+          <TaxSlabsViewer
+            taxYear={taxYear}
+            setTaxYear={setTaxYear}
+            taxpayerCategory={taxpayerCategory}
+            setTaxpayerCategory={setTaxpayerCategory}
+          />
+        )}
+
+        {activeTab === 'filer-vs-nonfiler' && <FilerVsNonFilerMatrix />}
+
+        {activeTab === 'tax-savings' && <TaxSavingsOptimizer taxYear={taxYear} taxpayerCategory={taxpayerCategory} />}
+
         {activeTab === 'zakat' && <ZakatCalculator />}
 
         {activeTab === 'history' && <CalculationHistory />}
@@ -323,13 +401,23 @@ export default function App() {
         {activeTab === 'it-export-tax' && <SpecializedCalculators initialTab="it-export" />}
 
         {activeTab === 'pta-mobile-tax' && <PtaMobileTaxCalculator />}
+
+        {activeTab === 'about' && <AboutPage onNavigate={navigateToCalculator} />}
+
+        {activeTab === 'contact' && <ContactPage onNavigate={navigateToCalculator} />}
+
+        {activeTab === 'privacy' && <PrivacyPage onNavigate={navigateToCalculator} />}
+
+        {activeTab === 'feedback' && <FeedbackPage onNavigate={navigateToCalculator} />}
         </Suspense>
         </div>
 
-        {/* Global Compliance & FAQ Section */}
-        <Suspense fallback={null}>
-          <TaxFaqSection activeTab={activeTab} />
-        </Suspense>
+        {/* Global Compliance & FAQ Section — skipped on plain content pages, which have no relevant tax FAQ */}
+        {!CONTENT_PAGE_TABS.has(activeTab) && (
+          <Suspense fallback={null}>
+            <TaxFaqSection activeTab={activeTab} />
+          </Suspense>
+        )}
       </main>
 
       {/* Printable Salary Slip / Tax Certificate Modal */}
@@ -396,6 +484,7 @@ export default function App() {
                 <h3 className="text-lg font-black uppercase tracking-wide mb-4 text-slate-800">Federal Taxes</h3>
                 <ul className="space-y-2 text-[15px] text-slate-700">
                   <li><button onClick={() => navigateToCalculator('invoice-tax')} className="hover:text-emerald-800 transition-colors">Invoice Tax (GST / WHT)</button></li>
+                  <li><button onClick={() => navigateToCalculator('invoice-withholding')} className="hover:text-emerald-800 transition-colors">Invoice Withholding (All in One)</button></li>
                   <li><button onClick={() => navigateToCalculator('calculator')} className="hover:text-emerald-800 transition-colors">Income Tax</button></li>
                   <li><button onClick={() => navigateToCalculator('property-valuation')} className="hover:text-emerald-800 transition-colors">FBR Property Valuation</button></li>
                 </ul>
@@ -415,6 +504,10 @@ export default function App() {
               <div>
                 <h3 className="text-lg font-black uppercase tracking-wide mb-4 text-slate-800">Other Tools</h3>
                 <ul className="space-y-2 text-[15px] text-slate-700">
+                  <li><button onClick={() => navigateToCalculator('reverse')} className="hover:text-emerald-800 transition-colors">Net to Gross Calculator</button></li>
+                  <li><button onClick={() => navigateToCalculator('tax-slabs')} className="hover:text-emerald-800 transition-colors">FBR Tax Slabs</button></li>
+                  <li><button onClick={() => navigateToCalculator('filer-vs-nonfiler')} className="hover:text-emerald-800 transition-colors">Filer vs Non-Filer Rates</button></li>
+                  <li><button onClick={() => navigateToCalculator('tax-savings')} className="hover:text-emerald-800 transition-colors">Tax Savings Optimizer</button></li>
                   <li><button onClick={() => setActiveTab('zakat')} className="hover:text-emerald-800 transition-colors">Zakat Calculator</button></li>
                   <li><button onClick={() => setActiveTab('specialized')} className="hover:text-emerald-800 transition-colors">Apna Ghar Calculator</button></li>
                   <li><button onClick={() => setActiveTab('history')} className="hover:text-emerald-800 transition-colors">My Account</button></li>
@@ -425,10 +518,10 @@ export default function App() {
                 <h3 className="text-lg font-black uppercase tracking-wide mb-4 text-slate-800">Company</h3>
                 <ul className="space-y-2 text-[15px] text-slate-700">
                   <li><button onClick={() => setActiveTab('calculator')} className="hover:text-emerald-800 transition-colors">Home</button></li>
-                  <li><button onClick={() => setActiveTab('calculator')} className="hover:text-emerald-800 transition-colors">About Us</button></li>
-                  <li><button onClick={() => setActiveTab('history')} className="hover:text-emerald-800 transition-colors">Feedback</button></li>
-                  <li><button onClick={() => setActiveTab('calculator')} className="hover:text-emerald-800 transition-colors">Contact</button></li>
-                  <li><button onClick={() => setActiveTab('calculator')} className="hover:text-emerald-800 transition-colors">Privacy Policy</button></li>
+                  <li><button onClick={() => navigateToCalculator('about')} className="hover:text-emerald-800 transition-colors">About Us</button></li>
+                  <li><button onClick={() => navigateToCalculator('feedback')} className="hover:text-emerald-800 transition-colors">Feedback</button></li>
+                  <li><button onClick={() => navigateToCalculator('contact')} className="hover:text-emerald-800 transition-colors">Contact</button></li>
+                  <li><button onClick={() => navigateToCalculator('privacy')} className="hover:text-emerald-800 transition-colors">Privacy Policy</button></li>
                 </ul>
               </div>
             </div>

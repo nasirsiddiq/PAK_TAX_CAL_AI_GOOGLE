@@ -2,6 +2,7 @@ export type AppTab =
   | 'calculator'
   | 'reverse'
   | 'invoice-tax'
+  | 'invoice-withholding'
   | 'provincial'
   | 'specialized'
   | 'property-valuation'
@@ -13,12 +14,20 @@ export type AppTab =
   | 'agricultural-tax'
   | 'property-stamp-duty'
   | 'vehicle-token-tax'
-  | 'professional-tax';
+  | 'professional-tax'
+  | 'tax-slabs'
+  | 'filer-vs-nonfiler'
+  | 'tax-savings'
+  | 'about'
+  | 'contact'
+  | 'privacy'
+  | 'feedback';
 
 export const TAB_TO_PATH: Record<AppTab, string> = {
   calculator: '/income-tax.html',
   reverse: '/reverse-net-to-gross.html',
   'invoice-tax': '/invoice-tax.html',
+  'invoice-withholding': '/invoice-withholding.html',
   provincial: '/sales-tax-punjab',
   specialized: '/specialized-calculators.html',
   'property-valuation': '/fbr-property-valuation.html',
@@ -31,6 +40,13 @@ export const TAB_TO_PATH: Record<AppTab, string> = {
   'property-stamp-duty': '/property-expense-calculator.html',
   'vehicle-token-tax': '/vehicle-token-tax.html',
   'professional-tax': '/professional-tax.html',
+  'tax-slabs': '/fbr-tax-slabs.html',
+  'filer-vs-nonfiler': '/filer-vs-non-filer.html',
+  'tax-savings': '/tax-savings-calculator.html',
+  about: '/about.html',
+  contact: '/contact.html',
+  privacy: '/privacy.html',
+  feedback: '/feedback.html',
 };
 
 const PATH_TO_TAB: Record<string, AppTab> = Object.fromEntries(
@@ -41,14 +57,10 @@ PATH_TO_TAB['/'] = 'calculator';
 
 const LEGACY_PATH_TO_TAB: Record<string, AppTab> = {
   '/index.html': 'calculator',
-  '/invoice-withholding.html': 'invoice-tax',
   '/withholding-tax.html': 'invoice-tax',
   '/sales-tax-withholding.html': 'invoice-tax',
   '/sales-tax-gst.html': 'invoice-tax',
   '/apna-ghar-calculator.html': 'specialized',
-  '/fbr-tax-slabs.html': 'calculator',
-  '/filer-vs-non-filer.html': 'calculator',
-  '/tax-savings-calculator.html': 'calculator',
   '/sales-tax-punjab.html': 'provincial',
   '/sales-tax-sindh.html': 'provincial',
   '/sales-tax-kpk.html': 'provincial',

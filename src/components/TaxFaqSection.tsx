@@ -192,6 +192,68 @@ const FAQS_BY_TAB: Record<string, FaqItem[]> = {
       answer: 'Nisab is the minimum threshold of wealth required before Zakat becomes due. The exact threshold is based on the current value of gold, silver, cash, and other eligible assets, with the calculation depending on the lunar year and your total net assets.',
     },
   ],
+  'invoice-withholding': [
+    {
+      category: 'All in One',
+      question: 'What does the "Invoice Withholding — All in One" calculator cover that Invoice Tax does not?',
+      answer:
+        'It combines Section 153 income tax withholding and GST on an invoice with an optional second section for provincial sales tax on services, so you can work out everything withheld on a single invoice in one place instead of switching between the Invoice Tax and Provincial Taxes tabs.',
+    },
+    {
+      category: 'WHT',
+      question: 'Is withholding tax the same as GST?',
+      answer:
+        'No. GST is charged on a taxable supply, while withholding tax is deducted by the payer from specified payments. Depending on the transaction, withholding tax may be adjustable against the supplier’s annual income tax.',
+    },
+    {
+      category: 'Provincial Services',
+      question: 'When does the provincial sales tax section apply?',
+      answer:
+        'Only when the invoice includes a taxable service under the relevant provincial authority (PRA, SRB, KPRA, BRA or ICT). Goods-only invoices generally fall outside provincial sales tax and only need the federal section above.',
+    },
+  ],
+  'tax-slabs': [
+    {
+      category: 'Tax Slabs',
+      question: 'How do I read the progressive tax slab table?',
+      answer:
+        'Each slab shows an income range, a fixed base tax already accumulated from lower slabs, and a marginal rate applied only to the portion of income within that slab. Enter your annual taxable income to see exactly which slab and rate applies to you.',
+    },
+    {
+      category: 'Slab Changes',
+      question: 'Do tax slabs change every year?',
+      answer:
+        'Yes. Slabs, base tax amounts, and rates are revised through the annual Finance Act and can change materially between tax years, so always confirm which tax year applies before comparing figures.',
+    },
+  ],
+  'filer-vs-nonfiler': [
+    {
+      category: 'Filer vs Non-Filer',
+      question: 'Why do filer and non-filer withholding tax rates differ so much?',
+      answer:
+        'Non-filer rates are set deliberately higher — often 2x to 4x the filer rate — as a compliance incentive under the Income Tax Ordinance 2001. Filers on the Active Taxpayer List (ATL) get the standard rate and, in most cases, an adjustable credit; non-filers usually cannot adjust the extra amount.',
+    },
+    {
+      category: 'Becoming a Filer',
+      question: 'How do I become an active filer?',
+      answer:
+        'File your annual income tax return on the FBR Iris portal. Once processed, your name is added to the Active Taxpayer List (ATL), which you can verify by SMS to 9966 in the format "ATL <CNIC>".',
+    },
+  ],
+  'tax-savings': [
+    {
+      category: 'Tax Credits',
+      question: 'How much can I legally reduce my tax through VPS, donations, and insurance?',
+      answer:
+        'Under Sections 61 and 62 of the Income Tax Ordinance 2001, eligible Voluntary Pension Scheme (VPS) contributions, approved charitable donations, and qualifying health insurance premiums earn a tax credit, subject to caps such as 20% of taxable income for VPS and 30% for donations.',
+    },
+    {
+      category: 'Eligibility',
+      question: 'Do donations need to go through a bank to qualify?',
+      answer:
+        'Yes. Donations must be made via crossed cheque or another banking channel to an approved Section 61 institution to qualify for the tax credit — cash donations generally do not qualify.',
+    },
+  ],
 };
 
 export const TaxFaqSection: React.FC<{ activeTab?: string }> = ({ activeTab = 'calculator' }) => {
@@ -226,6 +288,16 @@ export const TaxFaqSection: React.FC<{ activeTab?: string }> = ({ activeTab = 'c
       ? 'Frequently Asked Questions & Property / Vehicle / IT Export Guide'
       : activeTab === 'zakat'
       ? 'Frequently Asked Questions & Zakat Guide'
+      : activeTab === 'reverse'
+      ? 'Frequently Asked Questions & Net-to-Gross Salary Guide'
+      : activeTab === 'invoice-withholding'
+      ? 'Frequently Asked Questions & Invoice Withholding Guide'
+      : activeTab === 'tax-slabs'
+      ? 'Frequently Asked Questions & Tax Slabs Guide'
+      : activeTab === 'filer-vs-nonfiler'
+      ? 'Frequently Asked Questions & Filer vs Non-Filer Guide'
+      : activeTab === 'tax-savings'
+      ? 'Frequently Asked Questions & Tax Savings Guide'
       : 'Frequently Asked Questions & FBR Compliance Guide';
 
   return (

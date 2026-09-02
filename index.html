@@ -51,6 +51,35 @@
   </head>
   <body class="bg-slate-50 text-slate-900 antialiased font-sans">
     <div id="root"></div>
+
+    <!--
+      Hidden, plain-HTML forms for Netlify Forms.
+      Netlify detects forms by scanning the static HTML at build time, so a
+      form rendered only by React (as the real Contact/Feedback pages are)
+      is invisible to it. These static copies exist purely so Netlify's
+      build-time bot indexes the form names and field lists; the visible
+      forms in the app submit to these via a matching `form-name` field.
+      Do not remove — deleting these breaks real form submissions.
+    -->
+    <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="contact" />
+      <input type="text" name="bot-field" />
+      <select name="reason"><option>general</option></select>
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="text" name="subject" />
+      <textarea name="message"></textarea>
+    </form>
+    <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="feedback" />
+      <input type="text" name="bot-field" />
+      <select name="type"><option>general</option></select>
+      <select name="page"><option></option></select>
+      <textarea name="message"></textarea>
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+    </form>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
