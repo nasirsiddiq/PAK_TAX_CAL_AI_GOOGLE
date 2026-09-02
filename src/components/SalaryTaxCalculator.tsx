@@ -26,7 +26,6 @@ import {
 import { calculateIncomeTax, formatPakistaniUnits, formatPKR } from '../utils/taxCalculator';
 import { TAX_YEARS_CONFIG } from '../data/taxSlabs';
 import { SocialShareButtons } from './SocialShareButtons';
-
 interface SalaryTaxCalculatorProps {
   taxYear: TaxYear;
   setTaxYear: (year: TaxYear) => void;
@@ -34,7 +33,6 @@ interface SalaryTaxCalculatorProps {
   setTaxpayerCategory: (cat: TaxpayerCategory) => void;
   onOpenCertificate: () => void;
 }
-
 const PRESET_SALARIES_MONTHLY = [
   50000,
   100000,
@@ -46,7 +44,6 @@ const PRESET_SALARIES_MONTHLY = [
   1000000,
   2000000,
 ];
-
 export const SalaryTaxCalculator: React.FC<SalaryTaxCalculatorProps> = ({
   taxYear,
   setTaxYear,
@@ -59,7 +56,6 @@ export const SalaryTaxCalculator: React.FC<SalaryTaxCalculatorProps> = ({
   const [showDeductions, setShowDeductions] = useState(false);
   const [itExportRate, setItExportRate] = useState<number>(0.0025); // 0.25% PSEB or 0.01
   const [copied, setCopied] = useState(false);
-
   // Form State
   const [inputState, setInputState] = useState<SalaryBreakdownInput>({
     period: 'monthly',
@@ -80,7 +76,6 @@ export const SalaryTaxCalculator: React.FC<SalaryTaxCalculatorProps> = ({
     educationalExpensesSec60D: 0,
     advanceTaxDeducted: 0,
   });
-
   const handleInputChange = (field: keyof SalaryBreakdownInput, value: number | boolean) => {
     setInputState((prev) => {
       const next = { ...prev, [field]: value };
@@ -99,7 +94,6 @@ export const SalaryTaxCalculator: React.FC<SalaryTaxCalculatorProps> = ({
       return next;
     });
   };
-
   const handlePresetSelect = (amount: number) => {
     const val = period === 'monthly' ? amount : amount * 12;
     setInputState((prev) => ({
@@ -111,7 +105,6 @@ export const SalaryTaxCalculator: React.FC<SalaryTaxCalculatorProps> = ({
       conveyanceAllowance: val * 0.05,
     }));
   };
-
   // Perform calculation
   const result: TaxCalculationResult = calculateIncomeTax({
     taxYear,
@@ -124,7 +117,6 @@ export const SalaryTaxCalculator: React.FC<SalaryTaxCalculatorProps> = ({
     },
     itExportRate,
   });
-
   // Calculate comparison with previous fiscal year (e.g. 2024-2025)
   const prevYear: TaxYear = taxYear === '2025-2026' ? '2024-2025' : '2023-2024';
   const prevResult: TaxCalculationResult = calculateIncomeTax({
@@ -138,10 +130,8 @@ export const SalaryTaxCalculator: React.FC<SalaryTaxCalculatorProps> = ({
     },
     itExportRate,
   });
-
   const taxDifferenceAnnual = result.netTaxAnnual - prevResult.netTaxAnnual;
   const taxDifferenceMonthly = result.netTaxMonthly - prevResult.netTaxMonthly;
-
   const handleCopySummary = () => {
     const text = `--- Pak Tax Calculation (${TAX_YEARS_CONFIG[taxYear].label}) ---
 Taxpayer Category: ${taxpayerCategory.toUpperCase()}
@@ -153,16 +143,13 @@ Net Take-Home Salary: ${formatPKR(result.netTakeHomeMonthly)}/mo (${formatPKR(re
 Effective Tax Rate: ${result.effectiveTaxRate.toFixed(2)}%
 Marginal Slab Rate: ${result.marginalTaxRate.toFixed(2)}%
 Calculated via Pak Tax Calculator`;
-
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
   const takeHomePercentage = result.grossSalaryAnnual > 0 ? (result.netTakeHomeAnnual / result.grossSalaryAnnual) * 100 : 100;
   const taxPercentage = result.grossSalaryAnnual > 0 ? (result.netTaxAnnual / result.grossSalaryAnnual) * 100 : 0;
   const exemptionPercentage = result.grossSalaryAnnual > 0 ? (result.exemptionsAnnual / result.grossSalaryAnnual) * 100 : 0;
-
   return (
     <div className="space-y-6">
       {/* Category Notification Banner */}
@@ -189,7 +176,6 @@ Calculated via Pak Tax Calculator`;
             </p>
           </div>
         </div>
-
         <div className="flex items-center gap-2 self-end sm:self-center">
           <button
             onClick={onOpenCertificate}
@@ -200,7 +186,6 @@ Calculated via Pak Tax Calculator`;
           </button>
         </div>
       </div>
-
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-2.5 shadow-2xs">
         <span className="px-1 text-xs font-bold text-slate-600">Taxpayer type:</span>
         {([
@@ -223,19 +208,12 @@ Calculated via Pak Tax Calculator`;
           </button>
         ))}
       </div>
-
-      {/* Main Grid: Inputs Column vs Results Column */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Inputs (5 Cols on large screens) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Left Column: Input Form (5 Cols on large screens) */}
         <div className="lg:col-span-5 space-y-5">
           <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-5">
-            {/* Header & Period Toggle */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Calculator className="w-4 h-4 text-emerald-600" />
-                Income Details
-              </h3>
-
+            {/* Period Toggle */}
+            <div className="flex items-center justify-end pb-3 border-b border-slate-100">
               {/* Period Switcher */}
               <div className="inline-flex p-1 bg-slate-100 rounded-lg border border-slate-200">
                 <button
@@ -262,7 +240,6 @@ Calculated via Pak Tax Calculator`;
                 </button>
               </div>
             </div>
-
             {/* IT Export Option if Category is IT Export */}
             {taxpayerCategory === 'it_freelance_export' && (
               <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 space-y-2">
@@ -297,7 +274,6 @@ Calculated via Pak Tax Calculator`;
                 </div>
               </div>
             )}
-
             {/* Quick Presets */}
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -325,25 +301,24 @@ Calculated via Pak Tax Calculator`;
                 })}
               </div>
             </div>
-
             {/* Primary Gross Input */}
             {!useDetailedBreakdown ? (
-              <div className="space-y-2 rounded-2xl border-2 border-emerald-200 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 p-3.5 shadow-sm">
+              <div className="space-y-2 rounded-2xl border-2 border-red-300 bg-gradient-to-r from-red-50 via-white to-red-50 p-3.5 shadow-sm">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex-1">
-                    <div className="mb-1 inline-flex items-center rounded-full border border-emerald-300 bg-emerald-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-900">
+                    <div className="mb-1 inline-flex items-center rounded-full border border-red-400 bg-red-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-red-900">
                       Enter your income
                     </div>
                     <div className="text-sm font-bold text-slate-800">
                       {period === 'monthly' ? 'Monthly Gross Salary / Income' : 'Annual Gross Salary / Income'} (PKR)
                     </div>
                   </div>
-                  <span className="text-xs font-bold text-emerald-800 bg-white px-2.5 py-1 rounded-lg border border-emerald-200 shadow-xs">
+                  <span className="text-xs font-bold text-red-800 bg-white px-2.5 py-1 rounded-lg border border-red-300 shadow-xs">
                     {formatPakistaniUnits(inputState.grossSalary)}
                   </span>
                 </div>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-700 font-black text-base">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-red-700 font-black text-base">
                     Rs.
                   </span>
                   <input
@@ -354,7 +329,7 @@ Calculated via Pak Tax Calculator`;
                     value={inputState.grossSalary || ''}
                     onChange={(e) => handleInputChange('grossSalary', Math.max(0, Number(e.target.value)))}
                     placeholder="Enter amount (e.g. 150000)"
-                    className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-emerald-300 rounded-xl text-lg font-black text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-hidden focus:ring-4 focus:ring-emerald-200 focus:border-emerald-600 transition-all font-mono shadow-sm"
+                    className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-red-400 rounded-xl text-lg font-black text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-hidden focus:ring-4 focus:ring-red-200 focus:border-red-600 transition-all font-mono shadow-sm"
                   />
                 </div>
                 <p className="text-[11px] text-slate-600">
@@ -374,7 +349,6 @@ Calculated via Pak Tax Calculator`;
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-600 font-mono"
                   />
                 </div>
-
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-700">House Rent Allowance</label>
@@ -386,7 +360,6 @@ Calculated via Pak Tax Calculator`;
                       className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-600 font-mono"
                     />
                   </div>
-
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-semibold text-slate-700">Medical Allowance</label>
@@ -400,7 +373,6 @@ Calculated via Pak Tax Calculator`;
                     />
                   </div>
                 </div>
-
                 {/* Medical Allowance Exemption Checkbox */}
                 <div className="bg-emerald-50/70 border border-emerald-200 rounded-lg p-2.5 flex items-start gap-2">
                   <input
@@ -414,7 +386,6 @@ Calculated via Pak Tax Calculator`;
                     <span className="font-bold">Auto 10% Medical Exemption u/s Clause (139):</span> Up to 10% of basic salary is exempt from tax if hospital/treatment is not reimbursed.
                   </label>
                 </div>
-
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-700">Conveyance Allowance</label>
@@ -426,7 +397,6 @@ Calculated via Pak Tax Calculator`;
                       className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-600 font-mono"
                     />
                   </div>
-
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-700">Special / Other Allowances</label>
                     <input
@@ -438,7 +408,6 @@ Calculated via Pak Tax Calculator`;
                     />
                   </div>
                 </div>
-
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-700">Bonus / Commission</label>
@@ -450,7 +419,6 @@ Calculated via Pak Tax Calculator`;
                       className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-600 font-mono"
                     />
                   </div>
-
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-700">Other Taxable Income</label>
                     <input
@@ -462,14 +430,12 @@ Calculated via Pak Tax Calculator`;
                     />
                   </div>
                 </div>
-
                 <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs font-bold text-slate-900">
                   <span>Computed Total Gross:</span>
                   <span className="font-mono text-emerald-800">{formatPKR(inputState.grossSalary)}</span>
                 </div>
               </div>
             )}
-
             {/* Toggle Detailed Breakdown Switch */}
             <div className="pt-1">
               <button
@@ -481,7 +447,6 @@ Calculated via Pak Tax Calculator`;
                 {useDetailedBreakdown ? 'Switch to Simple Total Gross' : 'Specify Detailed Salary Allowances (Basic, Medical, Rent)'}
               </button>
             </div>
-
             {/* Tax Deductions & Credits Expandable Section */}
             <div className="border-t border-slate-200 pt-3">
               <button
@@ -495,7 +460,6 @@ Calculated via Pak Tax Calculator`;
                 </span>
                 {showDeductions ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
-
               {showDeductions && (
                 <div className="mt-3 space-y-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs">
                   <div className="space-y-1">
@@ -512,7 +476,6 @@ Calculated via Pak Tax Calculator`;
                       className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-mono text-slate-800 focus:ring-2 focus:ring-emerald-600"
                     />
                   </div>
-
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
                       <label className="font-semibold text-slate-700">Approved Donations (u/s 61)</label>
@@ -527,7 +490,6 @@ Calculated via Pak Tax Calculator`;
                       className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-mono text-slate-800 focus:ring-2 focus:ring-emerald-600"
                     />
                   </div>
-
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
                       <label className="font-semibold text-slate-700">Health Insurance Premium (u/s 62A)</label>
@@ -542,7 +504,6 @@ Calculated via Pak Tax Calculator`;
                       className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-mono text-slate-800 focus:ring-2 focus:ring-emerald-600"
                     />
                   </div>
-
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
                       <label className="font-semibold text-slate-700">Advance Tax Deducted (Adjustable)</label>
@@ -562,7 +523,6 @@ Calculated via Pak Tax Calculator`;
             </div>
           </div>
         </div>
-
         {/* Right Column: Calculation Results (7 Cols on large screens) */}
         <div className="lg:col-span-7 space-y-5">
           {/* Main Results Card */}
@@ -577,7 +537,6 @@ Calculated via Pak Tax Calculator`;
                   {TAX_YEARS_CONFIG[taxYear]?.label} &bull; Applicable FBR Rates
                 </p>
               </div>
-
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCopySummary}
@@ -589,7 +548,6 @@ Calculated via Pak Tax Calculator`;
                 </button>
               </div>
             </div>
-
             {/* Key Output Metrics Bento Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
               {/* Monthly Net Take-Home (Primary Hero) */}
@@ -606,7 +564,6 @@ Calculated via Pak Tax Calculator`;
                       Annual Take-Home: <span className="font-mono font-bold">{formatPKR(result.netTakeHomeAnnual)}</span> ({formatPakistaniUnits(result.netTakeHomeAnnual)})
                     </div>
                   </div>
-
                   <div className="flex flex-row sm:flex-col items-start sm:items-end justify-between border-t sm:border-t-0 border-emerald-800/60 pt-2 sm:pt-0">
                     <div className="text-left sm:text-right">
                       <span className="text-[11px] text-emerald-300 block">Effective Tax Rate</span>
@@ -622,7 +579,6 @@ Calculated via Pak Tax Calculator`;
                   </div>
                 </div>
               </div>
-
               {/* Monthly Gross Income */}
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-1">
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
@@ -635,7 +591,6 @@ Calculated via Pak Tax Calculator`;
                   Annual: <span className="font-mono">{formatPKR(result.grossSalaryAnnual)}</span>
                 </div>
               </div>
-
               {/* Monthly Tax (WHT) */}
               <div className="bg-rose-50/70 border border-rose-200 rounded-xl p-4 space-y-1">
                 <span className="text-xs font-bold text-rose-800 uppercase tracking-wider block">
@@ -648,7 +603,6 @@ Calculated via Pak Tax Calculator`;
                   Annual Tax: <span className="font-mono">{formatPKR(result.netTaxAnnual)}</span>
                 </div>
               </div>
-
               {/* Taxable Income After Exemptions */}
               <div className="bg-blue-50/70 border border-blue-200 rounded-xl p-4 space-y-1">
                 <span className="text-xs font-bold text-blue-800 uppercase tracking-wider block">
@@ -662,7 +616,6 @@ Calculated via Pak Tax Calculator`;
                 </div>
               </div>
             </div>
-
             {/* Visual Breakdown Stacked Bar */}
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between text-xs font-bold text-slate-700">
@@ -707,7 +660,6 @@ Calculated via Pak Tax Calculator`;
                 )}
               </div>
             </div>
-
             {/* Year-over-Year Tax Comparison Card */}
             {taxYear === '2025-2026' && (
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -720,7 +672,6 @@ Calculated via Pak Tax Calculator`;
                     In FY 2025-26, lower tax rates (1% vs 5%) and broadened slabs offer tax relief.
                   </p>
                 </div>
-
                 <div className="text-right shrink-0">
                   {taxDifferenceAnnual < 0 ? (
                     <div className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200">
@@ -739,7 +690,6 @@ Calculated via Pak Tax Calculator`;
                 </div>
               </div>
             )}
-
             {/* Active Slab Highlight Box */}
             <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200 flex items-start gap-3">
               <CheckCircle2 className="w-4 h-4 text-emerald-700 mt-0.5 shrink-0" />
@@ -748,14 +698,12 @@ Calculated via Pak Tax Calculator`;
                 {result.activeSlab.description} (Taxable Income: {formatPKR(result.taxableIncomeAnnual)}/year).
               </div>
             </div>
-
             {/* Progressive Step-by-Step Slab Calculation Table */}
             <div className="space-y-2">
               <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center justify-between">
                 <span>Progressive Tax Calculation Breakdown</span>
                 <span className="text-[10px] text-slate-500 lowercase font-normal">FBR Progressive Slabs</span>
               </h4>
-
               <div className="overflow-x-auto rounded-xl border border-slate-200">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
@@ -833,7 +781,6 @@ Calculated via Pak Tax Calculator`;
                 </table>
               </div>
             </div>
-
             {/* Quick Action Footer */}
             <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
               <button
@@ -848,7 +795,6 @@ Calculated via Pak Tax Calculator`;
           </div>
         </div>
       </div>
-
       {/* Social Sharing Section */}
       <SocialShareButtons
         title="Pakistan Salary Tax Calculator"
@@ -859,5 +805,4 @@ Calculated via Pak Tax Calculator`;
     </div>
   );
 };
-
 export default SalaryTaxCalculator;

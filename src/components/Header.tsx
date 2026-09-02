@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Calculator, Clock, Home, Landmark, LogIn, ShoppingCart, TrendingDown, TrendingUp, UserPlus } from 'lucide-react';
 import { TaxYear } from '../types/tax';
 import { TAX_YEARS_CONFIG } from '../data/taxSlabs';
@@ -23,8 +23,29 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAuth,
   onOpenSignUp,
 }) => {
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrolledDown = currentScrollY > lastScrollY.current;
+      const pastThreshold = currentScrollY > 96;
+
+      setHidden(scrolledDown && pastThreshold);
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+    <header
+      className={`bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs transition-transform duration-300 ${
+        hidden ? '-translate-y-full' : 'translate-y-0'
+      }`}
+    >
       {/* Main Header Brand & Core Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
