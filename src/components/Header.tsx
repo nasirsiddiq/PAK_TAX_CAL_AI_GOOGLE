@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calculator, Clock, FileStack, Home, Landmark, LogIn, RefreshCw, Scale, ShieldCheck, ShoppingCart, Sparkles, TrendingDown, TrendingUp, UserPlus } from 'lucide-react';
+import { Calculator, Clock, FileStack, GraduationCap, Home, Landmark, LogIn, RefreshCw, Scale, ShieldCheck, ShoppingCart, Sparkles, TrendingDown, TrendingUp, UserPlus } from 'lucide-react';
 import { TaxYear } from '../types/tax';
 import { TAX_YEARS_CONFIG } from '../data/taxSlabs';
 import type { AppTab } from '../utils/subdomainRoutes';
@@ -228,6 +228,15 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Clock className="w-4 h-4 text-emerald-600" />
             <span>14. My Account</span>
+          </button>
+
+          <button
+            id="tab-iris-simulator"
+            onClick={() => setActiveTab('iris-simulator')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'iris-simulator' ? 'bg-emerald-800 text-white shadow-sm ring-1 ring-emerald-900' : 'bg-emerald-50 text-emerald-900 border border-emerald-300/80 hover:bg-emerald-100'}`}
+          >
+            <GraduationCap className="w-4 h-4 text-emerald-600" />
+            <span className="font-extrabold">15. IRIS Practice Simulator</span>
           </button>
         </nav>
       </div>

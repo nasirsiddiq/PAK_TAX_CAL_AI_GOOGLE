@@ -161,4 +161,10 @@ export const PAGE_SEO: Record<AppTab, PageSeoEntry> = {
     keywords: 'feedback pak tax calculator, report tax rate error, suggest calculator',
     image: '/og/feedback.jpg',
   },
+  'iris-simulator': {
+    title: 'FBR IRIS Practice Simulator | Practice Your Tax Return',
+    description: 'Practice filing your Pakistan income tax return before using the real FBR IRIS portal. A free, independent simulator covering salary, property, business, capital gain, foreign income, agriculture and the Wealth Statement.',
+    keywords: 'IRIS practice simulator, FBR IRIS practice, how to file tax return Pakistan, IRIS return demo, practice tax return Pakistan, wealth statement practice, FBR 114(1) return, IRIS login practice',
+    image: '/og/iris-simulator.jpg',
+  },
 };

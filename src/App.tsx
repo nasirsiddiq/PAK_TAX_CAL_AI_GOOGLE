@@ -22,6 +22,7 @@ const AboutPage = lazy(() => import('./components/AboutPage'));
 const ContactPage = lazy(() => import('./components/ContactPage'));
 const PrivacyPage = lazy(() => import('./components/PrivacyPage'));
 const FeedbackPage = lazy(() => import('./components/FeedbackPage'));
+const IrisPracticeSimulator = lazy(() => import('./components/IrisPracticeSimulator'));
 import { TaxpayerCategory, TaxYear } from './types/tax';
 import { calculateIncomeTax } from './utils/taxCalculator';
 import { buildCalculatorUrl, getTabFromPathname, type AppTab } from './utils/subdomainRoutes';
@@ -295,6 +296,8 @@ export default function App() {
         {activeTab === 'privacy' && <PrivacyPage onNavigate={navigateToCalculator} />}
 
         {activeTab === 'feedback' && <FeedbackPage onNavigate={navigateToCalculator} />}
+
+        {activeTab === 'iris-simulator' && <IrisPracticeSimulator />}
         </Suspense>
         </div>
 

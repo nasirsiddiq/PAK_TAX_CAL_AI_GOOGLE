@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calculator, Landmark, RefreshCw, TrendingDown, ShoppingCart, TrendingUp, Home, Clock, ArrowRight } from 'lucide-react';
+import { Calculator, GraduationCap, Landmark, RefreshCw, TrendingDown, ShoppingCart, TrendingUp, Home, Clock, ArrowRight } from 'lucide-react';
 import type { AppTab } from '../utils/subdomainRoutes';
 
 interface RelatedCalculatorsProps {
@@ -79,6 +79,15 @@ export const RelatedCalculators: React.FC<RelatedCalculatorsProps> = ({ currentT
       color: 'text-slate-600',
       bgColor: 'bg-slate-50',
       borderColor: 'border-slate-200',
+    },
+    {
+      id: 'iris-simulator',
+      title: 'IRIS Practice Simulator',
+      description: 'Practice filing your return before using the real FBR IRIS portal',
+      icon: <GraduationCap className="w-6 h-6" />,
+      color: 'text-emerald-700',
+      bgColor: 'bg-emerald-50',
+      borderColor: 'border-emerald-200',
     },
   ];
 

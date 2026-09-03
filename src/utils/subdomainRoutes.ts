@@ -21,7 +21,8 @@ export type AppTab =
   | 'about'
   | 'contact'
   | 'privacy'
-  | 'feedback';
+  | 'feedback'
+  | 'iris-simulator';
 
 export const TAB_TO_PATH: Record<AppTab, string> = {
   calculator: '/income-tax.html',
@@ -47,6 +48,7 @@ export const TAB_TO_PATH: Record<AppTab, string> = {
   contact: '/contact.html',
   privacy: '/privacy.html',
   feedback: '/feedback.html',
+  'iris-simulator': '/iris-practice-simulator.html',
 };
 
 const PATH_TO_TAB: Record<string, AppTab> = Object.fromEntries(
