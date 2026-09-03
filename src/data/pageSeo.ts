@@ -6,6 +6,13 @@ export interface PageSeoEntry {
   keywords: string;
   /** Absolute-from-root path to this page's social share image (1200x630). */
   image: string;
+  /**
+   * Set for pages that are account-specific and have no content worth
+   * indexing or serving ads against for a signed-out visitor (e.g. the
+   * calculation history page, which is just a "Sign In Required" notice
+   * until the user signs in). Tells App.tsx to mark the page noindex.
+   */
+  noindex?: boolean;
 }
 
 // Single source of truth for per-page SEO + social share metadata. Used both
@@ -16,9 +23,9 @@ export interface PageSeoEntry {
 // see the default homepage tags).
 export const PAGE_SEO: Record<AppTab, PageSeoEntry> = {
   calculator: {
-    title: 'Pakistan Salary Tax Calculator 2026-27 | FBR Income Tax',
-    description: 'Calculate Pakistan salary income tax, monthly tax deduction, annual tax liability, and take-home salary under FBR tax slabs.',
-    keywords: 'Pakistan income tax calculator, salary tax calculator Pakistan, FBR tax calculator, tax slabs 2026-27, monthly salary tax, take home salary Pakistan',
+    title: 'Pakistan Income & Salary Tax Calculator 2025-26 & 2026-27',
+    description: 'Free Pakistan income tax & salary tax calculator, updated for FY 2025-26 and 2026-27. Instantly calculate FBR income tax, monthly withholding, and take-home salary.',
+    keywords: 'Pakistan income tax calculator, salary tax calculator Pakistan, FBR tax calculator, tax calculator 2025-26, tax calculator 2026-27, tax calculator pakistan 2025-26, salary tax calculator 2025-26, tax calculator pakistan, income tax calculation in pakistan, tax calculator fbr pakistan, income tax rate in pakistan, monthly salary tax, take home salary Pakistan',
     image: '/og/calculator.jpg',
   },
   reverse: {
@@ -30,7 +37,7 @@ export const PAGE_SEO: Record<AppTab, PageSeoEntry> = {
   'invoice-tax': {
     title: 'Pakistan Invoice Tax Calculator | GST and WHT',
     description: 'Calculate Pakistan GST and withholding tax on invoices and payments using current FBR tax rules.',
-    keywords: 'Pakistan GST calculator, withholding tax calculator Pakistan, WHT calculator, invoice tax calculator, sales tax on invoice, FBR withholding tax rates',
+    keywords: 'Pakistan GST calculator, withholding tax calculator Pakistan, withholding tax pakistan, WHT calculator, invoice tax calculator, sales tax on invoice, FBR withholding tax rates',
     image: '/og/invoice-tax.jpg',
   },
   provincial: {
@@ -66,7 +73,7 @@ export const PAGE_SEO: Record<AppTab, PageSeoEntry> = {
   'pta-mobile-tax': {
     title: 'PTA Mobile Registration Tax Calculator | Pakistan',
     description: 'Estimate PTA and customs registration taxes for imported mobile phones using CNIC or passport registration.',
-    keywords: 'PTA tax calculator, mobile registration tax Pakistan, DIRBS tax, FBR mobile duty, phone tax Pakistan, IMEI registration tax, passport CNIC mobile tax',
+    keywords: 'PTA tax calculator, mobile registration tax Pakistan, tax on mobile phones in Pakistan, DIRBS tax, FBR mobile duty, phone tax Pakistan, IMEI registration tax, passport CNIC mobile tax',
     image: '/og/pta-mobile-tax.jpg',
   },
   zakat: {
@@ -80,6 +87,7 @@ export const PAGE_SEO: Record<AppTab, PageSeoEntry> = {
     description: 'Review saved Pakistan tax calculations and reusable calculation templates.',
     keywords: 'Pakistan tax calculation history, saved tax calculations',
     image: '/og/history.jpg',
+    noindex: true,
   },
   'agricultural-tax': {
     title: 'Pakistan Agricultural Income Tax Calculator',

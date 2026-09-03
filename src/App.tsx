@@ -101,6 +101,7 @@ export default function App() {
     document.title = seo.title;
     setMetaTag('name', 'description', seo.description);
     setMetaTag('name', 'keywords', seo.keywords);
+    setMetaTag('name', 'robots', seo.noindex ? 'noindex, nofollow' : 'index, follow');
     setMetaTag('property', 'og:title', seo.title);
     setMetaTag('property', 'og:description', seo.description);
     setMetaTag('property', 'og:url', canonicalUrl);

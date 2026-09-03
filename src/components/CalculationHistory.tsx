@@ -38,6 +38,24 @@ const CalculationHistory: React.FC = () => {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
+  // This page is behind sign-in, and signed-out visitors (including any
+  // crawler, since crawlers never authenticate) only ever see the brief
+  // "Sign In Required" notice below — no real content. Google's AdSense
+  // Auto ads (the sitewide loader script in index.html, no manual ad
+  // slots) will otherwise still try to place ads on that thin screen,
+  // which Google's own publisher policy flags as "ads on screens without
+  // publisher-content." Pausing ad requests while signed out, and
+  // resuming once real content is shown, keeps ads off that dead-end
+  // screen without touching any other page.
+  useEffect(() => {
+    const w = window as unknown as { adsbygoogle?: { pauseAdRequests?: number } & unknown[] };
+    w.adsbygoogle = w.adsbygoogle || ([] as unknown as typeof w.adsbygoogle);
+    (w.adsbygoogle as { pauseAdRequests?: number }).pauseAdRequests = user ? 0 : 1;
+    return () => {
+      if (w.adsbygoogle) (w.adsbygoogle as { pauseAdRequests?: number }).pauseAdRequests = 0;
+    };
+  }, [user]);
+
   const getValueFromObject = (value: unknown): string => {
     if (!value) return '';
     if (typeof value === 'string') return value;
