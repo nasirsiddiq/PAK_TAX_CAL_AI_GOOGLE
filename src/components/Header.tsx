@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Calculator, Clock, FileStack, GraduationCap, Home, Landmark, LogIn, RefreshCw, Scale, ShieldCheck, ShoppingCart, Sparkles, TrendingDown, TrendingUp, UserPlus } from 'lucide-react';
 import { TaxYear } from '../types/tax';
 import { TAX_YEARS_CONFIG } from '../data/taxSlabs';
@@ -23,8 +23,28 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAuth,
   onOpenSignUp,
 }) => {
+  // The header collapses away as soon as the page scrolls past the very top,
+  // and only reappears once you scroll all the way back up — freeing up
+  // screen space on the (fairly tall) calculator pages below it.
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    const SCROLL_THRESHOLD = 8;
+    const onScroll = () => setCollapsed(window.scrollY > SCROLL_THRESHOLD);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+    <header className="bg-white sticky top-0 z-40">
+      <div
+        className={`overflow-hidden border-b transition-[max-height,opacity,box-shadow] duration-300 ease-in-out ${
+          collapsed
+            ? 'max-h-0 opacity-0 border-transparent shadow-none pointer-events-none'
+            : 'max-h-[1000px] opacity-100 border-slate-200 shadow-xs'
+        }`}
+      >
       {/* Main Header Brand & Core Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -239,6 +259,7 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="font-extrabold">15. IRIS Practice Simulator</span>
           </button>
         </nav>
+      </div>
       </div>
     </header>
   );
