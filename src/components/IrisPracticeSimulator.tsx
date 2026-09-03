@@ -12,15 +12,14 @@ import {
   FileText,
   Globe2,
   Info,
-  KeyRound,
   Landmark,
-  Lock,
   RotateCcw,
   ShieldCheck,
   Sparkles,
   User,
   Wallet,
   Wheat,
+  X,
 } from 'lucide-react';
 import { TAX_YEARS_CONFIG } from '../data/taxSlabs';
 import type { TaxSlab, TaxYear } from '../types/tax';
@@ -41,7 +40,6 @@ type IncomeKey =
 
 type StepId =
   | 'intro'
-  | 'login'
   | 'declaration'
   | 'sources'
   | 'income'
@@ -69,7 +67,6 @@ const INCOME_SOURCES: IncomeSourceMeta[] = [
 ];
 
 const STEPS: { id: Exclude<StepId, 'intro' | 'receipt'>; label: string; icon: typeof Briefcase }[] = [
-  { id: 'login', label: 'Login', icon: KeyRound },
   { id: 'declaration', label: 'Declaration', icon: User },
   { id: 'sources', label: 'Income Sources', icon: FileText },
   { id: 'income', label: 'Income Details', icon: Coins },
@@ -176,16 +173,16 @@ function creditFor(amount: number, taxableIncome: number, avgRate: number, capFr
 // Main component
 // ---------------------------------------------------------------------------
 
-export default function IrisPracticeSimulator() {
-  const [step, setStep] = useState<StepId>('intro');
+interface IrisPracticeSimulatorProps {
+  /** Called when the user wants to leave the simulator and return to the main site. The site header and other chrome are hidden while this component is mounted, so it needs its own way back. */
+  onExit?: () => void;
+}
 
-  // Login (visual only — nothing is validated, stored beyond this session, or sent anywhere)
-  const [loginId, setLoginId] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
+export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorProps) {
+  const [step, setStep] = useState<StepId>('intro');
 
   // Declaration
   const [name, setName] = useState('');
-  const [cnic, setCnic] = useState('');
   const [taxYear, setTaxYear] = useState<TaxYear>('2026-2027');
   const [residency, setResidency] = useState<'resident' | 'non-resident'>('resident');
 
@@ -236,7 +233,7 @@ export default function IrisPracticeSimulator() {
   const [submittedAt, setSubmittedAt] = useState<Date | null>(null);
 
   const activeStepIds: StepId[] = useMemo(() => {
-    const base: StepId[] = ['intro', 'login', 'declaration', 'sources'];
+    const base: StepId[] = ['intro', 'declaration', 'sources'];
     if (!noIncomeDeclared) base.push('income');
     base.push('taxChargeable', 'wealth', 'review', 'receipt');
     return base;
@@ -405,10 +402,7 @@ export default function IrisPracticeSimulator() {
 
   function resetAll() {
     setStep('intro');
-    setLoginId('');
-    setLoginPassword('');
     setName('');
-    setCnic('');
     setTaxYear('2026-2027');
     setResidency('resident');
     setSelectedSources({
@@ -458,15 +452,36 @@ export default function IrisPracticeSimulator() {
       <Info className="w-4 h-4 text-amber-700 mt-0.5 flex-shrink-0" />
       <p className="text-xs text-amber-800 leading-relaxed">
         <strong>This is an independent practice simulator, not the real FBR IRIS system.</strong> Nothing you type
-        here is saved, transmitted, or sent to FBR — it stays in your browser for this session only. Do not enter
-        your real CNIC, password, or any real financial information. When you're ready to file for real, go to{' '}
-        <strong>iris.fbr.gov.pk</strong>.
+        here is saved, transmitted, or sent to FBR — it stays in your browser for this session only. There's no
+        login, so use round-figure practice numbers rather than your real financial details. When you're ready to
+        file for real, go to <strong>iris.fbr.gov.pk</strong>.
       </p>
     </div>
   );
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6">
+    <div className="min-h-screen bg-slate-50">
+      {/* Standing in for the site header, which is hidden while the simulator is
+          open so this practice environment feels focused and distraction-free. */}
+      <div className="bg-emerald-900 text-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Landmark className="w-4.5 h-4.5 text-emerald-300" />
+            <span className="text-sm font-bold">Pak Tax Calculator</span>
+            <span className="text-xs text-emerald-300 font-semibold hidden sm:inline">— Practice Mode</span>
+          </div>
+          {onExit && (
+            <button
+              onClick={onExit}
+              className="flex items-center gap-1.5 text-xs font-bold text-emerald-100 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg px-3 py-1.5 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" /> Exit Practice Mode
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto p-4 sm:p-6">
       <div className="mb-5">
         <div className="flex items-center gap-2 mb-1">
           <ShieldCheck className="w-6 h-6 text-emerald-700" />
@@ -518,18 +533,18 @@ export default function IrisPracticeSimulator() {
               <Sparkles className="w-10 h-10 text-emerald-600 mx-auto mb-3" />
               <h2 className="text-xl font-bold text-slate-900 mb-2">Practice your annual return, risk-free</h2>
               <p className="text-sm text-slate-600 max-w-xl mx-auto">
-                Walk through a mock login, income declaration, tax computation and wealth statement modeled on FBR's
-                real 114(1) Return of Income and 116 Wealth Statement — so the real IRIS portal feels familiar when
-                you file for real.
+                Walk through income declaration, tax computation and wealth statement steps modeled on FBR's real
+                114(1) Return of Income and 116 Wealth Statement — so the real IRIS portal feels familiar when you
+                file for real.
               </p>
             </div>
             {disclaimerBanner}
             <div className="grid sm:grid-cols-2 gap-3">
               {[
-                { icon: KeyRound, text: 'Mock login screen — no real credentials needed' },
                 { icon: FileText, text: 'Declare income across up to 7 source categories' },
                 { icon: Calculator, text: 'See tax chargeable, credits and withholding, computed live' },
                 { icon: Wallet, text: 'Full Wealth Statement with automatic reconciliation check' },
+                { icon: ShieldCheck, text: 'No login, CNIC or password needed — just start practicing' },
               ].map((f, i) => (
                 <div key={i} className="flex items-center gap-2.5 bg-white rounded-lg border border-slate-200 px-3 py-2.5">
                   <f.icon className="w-4 h-4 text-emerald-700 flex-shrink-0" />
@@ -538,46 +553,11 @@ export default function IrisPracticeSimulator() {
               ))}
             </div>
             <button
-              onClick={() => setStep('login')}
+              onClick={() => setStep('declaration')}
               className="w-full sm:w-auto ml-auto flex items-center justify-center gap-2 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors"
             >
-              Start Practice Return <ArrowRight className="w-4 h-4" />
+              Start Your Tax Return Practice <ArrowRight className="w-4 h-4" />
             </button>
-          </div>
-        )}
-
-        {step === 'login' && (
-          <div className="space-y-5 max-w-sm mx-auto">
-            <div className="text-center">
-              <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-2">
-                <Lock className="w-6 h-6 text-emerald-700" />
-              </div>
-              <h2 className="text-lg font-bold text-slate-900">Practice Login</h2>
-              <p className="text-xs text-slate-500 mt-1">A stand-in for the real IRIS login — nothing here is checked or saved.</p>
-            </div>
-            {disclaimerBanner}
-            <div className="space-y-3">
-              <label className="block">
-                <span className="block text-sm font-semibold text-slate-700 mb-1">Registration No. / CNIC (practice)</span>
-                <input
-                  type="text"
-                  value={loginId}
-                  onChange={(e) => setLoginId(e.target.value)}
-                  placeholder="e.g. 00000-0000000-0 (any text works)"
-                  className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 outline-none text-sm"
-                />
-              </label>
-              <label className="block">
-                <span className="block text-sm font-semibold text-slate-700 mb-1">Password (practice)</span>
-                <input
-                  type="password"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="Any text works — not checked"
-                  className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 outline-none text-sm"
-                />
-              </label>
-            </div>
           </div>
         )}
 
@@ -592,16 +572,6 @@ export default function IrisPracticeSimulator() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="For your practice receipt only"
-                    className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 outline-none text-sm"
-                  />
-                </label>
-                <label className="block">
-                  <span className="block text-sm font-semibold text-slate-700 mb-1">CNIC (optional)</span>
-                  <input
-                    type="text"
-                    value={cnic}
-                    onChange={(e) => setCnic(e.target.value)}
-                    placeholder="Not validated — practice only"
                     className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 outline-none text-sm"
                   />
                 </label>
@@ -1025,6 +995,7 @@ export default function IrisPracticeSimulator() {
           </button>
         </div>
       )}
+      </div>
     </div>
   );
 }

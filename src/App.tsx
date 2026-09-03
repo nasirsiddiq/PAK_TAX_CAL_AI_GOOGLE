@@ -33,6 +33,12 @@ import { PAGE_SEO } from './data/pageSeo';
 // Plain informational pages — no calculator to print/export as PDF, and no
 // tax FAQ relevant to show underneath them.
 const CONTENT_PAGE_TABS = new Set<AppTab>(['about', 'contact', 'privacy', 'feedback']);
+// The IRIS simulator is a focused, distraction-free wizard: the site header,
+// floating cross-sell widgets, print/PDF buttons and the generic calculator
+// FAQ section are all hidden while it's open (see the `isFocusMode` checks
+// below), mirroring how the real IRIS portal has its own dedicated header
+// with no surrounding site chrome.
+const FOCUS_MODE_TABS = new Set<AppTab>(['iris-simulator']);
 
 function setMetaTag(attribute: 'name' | 'property', value: string, content: string) {
   let element = document.querySelector(`meta[${attribute}="${value}"]`) as HTMLMetaElement | null;
@@ -194,10 +200,12 @@ export default function App() {
     },
   });
 
+  const isFocusMode = FOCUS_MODE_TABS.has(activeTab);
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-emerald-200 selection:text-emerald-900">
-      {/* Header */}
-      <Header
+      {/* Header — hidden in focus mode (e.g. the IRIS simulator) for a distraction-free view */}
+      {!isFocusMode && <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         taxYear={taxYear}
@@ -205,11 +213,11 @@ export default function App() {
         onOpenCertificate={() => setIsCertificateModalOpen(true)}
         onOpenAuth={() => { setOpenAuthAsSignUp(false); setIsAuthModalOpen(true); }}
         onOpenSignUp={() => { setOpenAuthAsSignUp(true); setIsAuthModalOpen(true); }}
-      />
+      />}
 
       {/* Main Content Area */}
       <main id="pak-tax-page-content" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 pb-28 sm:py-8 sm:pb-32 space-y-8 print:shadow-none">
-        {activeTab !== 'provincial' && !CONTENT_PAGE_TABS.has(activeTab) && <div className="flex justify-end gap-3 print:hidden">
+        {activeTab !== 'provincial' && !CONTENT_PAGE_TABS.has(activeTab) && !isFocusMode && <div className="flex justify-end gap-3 print:hidden">
           <button
             onClick={handlePrintPage}
             className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
@@ -297,12 +305,12 @@ export default function App() {
 
         {activeTab === 'feedback' && <FeedbackPage onNavigate={navigateToCalculator} />}
 
-        {activeTab === 'iris-simulator' && <IrisPracticeSimulator />}
+        {activeTab === 'iris-simulator' && <IrisPracticeSimulator onExit={() => navigateToCalculator('calculator')} />}
         </Suspense>
         </div>
 
         {/* Global Compliance & FAQ Section — skipped on plain content pages, which have no relevant tax FAQ */}
-        {!CONTENT_PAGE_TABS.has(activeTab) && (
+        {!CONTENT_PAGE_TABS.has(activeTab) && !isFocusMode && (
           <Suspense fallback={null}>
             <TaxFaqSection activeTab={activeTab} />
           </Suspense>
@@ -339,30 +347,30 @@ export default function App() {
         passing through to the footer links behind them. `pointer-events-auto`
         on the actual clickable card/button opts it back in.
       */}
-      <aside className="fixed bottom-4 right-4 z-30 w-[calc(100%-2rem)] max-w-xl xl:hidden print:hidden pointer-events-none" aria-label="Quick calculator links">
+      {!isFocusMode && <aside className="fixed bottom-4 right-4 z-30 w-[calc(100%-2rem)] max-w-xl xl:hidden print:hidden pointer-events-none" aria-label="Quick calculator links">
         <div className="pointer-events-auto rounded-xl border border-emerald-200 bg-white/95 p-3 shadow-lg backdrop-blur flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs font-bold text-slate-700">Open another calculator:</p>
           <div className="flex gap-2">
             {quickLinks.map((link) => <button key={link.tab} onClick={() => navigateToCalculator(link.tab)} className={`flex-1 rounded-lg px-3 py-2 text-xs font-bold transition-colors cursor-pointer sm:flex-none ${link.tone === 'emerald' ? 'bg-emerald-800 text-white hover:bg-emerald-700' : 'border border-sky-300 bg-sky-50 text-sky-800 hover:bg-sky-100'}`}>{link.label}</button>)}
           </div>
         </div>
-      </aside>
+      </aside>}
 
-      <aside className="fixed left-4 top-1/2 z-30 hidden w-32 -translate-y-1/2 xl:block print:hidden pointer-events-none" aria-label="Related calculator link">
+      {!isFocusMode && <aside className="fixed left-4 top-1/2 z-30 hidden w-32 -translate-y-1/2 xl:block print:hidden pointer-events-none" aria-label="Related calculator link">
         <button onClick={() => navigateToCalculator(quickLinks[0].tab)} className="pointer-events-auto w-full rounded-xl border border-emerald-300 bg-white p-3 text-left shadow-lg transition hover:border-emerald-500 hover:bg-emerald-50 cursor-pointer">
           <span className="block text-[10px] font-bold uppercase tracking-wider text-emerald-700">{quickLinks[0].label}</span>
           <span className="mt-1 block text-sm font-extrabold leading-snug text-slate-900">{quickLinks[0].prompt}</span>
           <span className="mt-3 block text-xs font-bold text-emerald-800">Open calculator →</span>
         </button>
-      </aside>
+      </aside>}
 
-      <aside className="fixed right-4 top-1/2 z-30 hidden w-32 -translate-y-1/2 xl:block print:hidden pointer-events-none" aria-label="Related calculator link">
+      {!isFocusMode && <aside className="fixed right-4 top-1/2 z-30 hidden w-32 -translate-y-1/2 xl:block print:hidden pointer-events-none" aria-label="Related calculator link">
         <button onClick={() => navigateToCalculator(quickLinks[1].tab)} className="pointer-events-auto w-full rounded-xl border border-sky-300 bg-white p-3 text-left shadow-lg transition hover:border-sky-500 hover:bg-sky-50 cursor-pointer">
           <span className="block text-[10px] font-bold uppercase tracking-wider text-sky-700">{quickLinks[1].label}</span>
           <span className="mt-1 block text-sm font-extrabold leading-snug text-slate-900">{quickLinks[1].prompt}</span>
           <span className="mt-3 block text-xs font-bold text-sky-800">Open calculator →</span>
         </button>
-      </aside>
+      </aside>}
 
       <div className="bg-[#dfeee5] border-t border-emerald-200 mt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
@@ -408,6 +416,7 @@ export default function App() {
                   <li><button onClick={() => navigateToCalculator('tax-savings')} className="hover:text-emerald-800 transition-colors">Tax Savings Optimizer</button></li>
                   <li><button onClick={() => setActiveTab('zakat')} className="hover:text-emerald-800 transition-colors">Zakat Calculator</button></li>
                   <li><button onClick={() => setActiveTab('specialized')} className="hover:text-emerald-800 transition-colors">Apna Ghar Calculator</button></li>
+                  <li><button onClick={() => navigateToCalculator('iris-simulator')} className="hover:text-emerald-800 transition-colors">IRIS Practice Simulator</button></li>
                   <li><button onClick={() => setActiveTab('history')} className="hover:text-emerald-800 transition-colors">My Account</button></li>
                 </ul>
               </div>
