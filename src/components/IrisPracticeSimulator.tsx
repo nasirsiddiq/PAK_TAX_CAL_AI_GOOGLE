@@ -48,6 +48,8 @@ type StepId =
   | 'review'
   | 'receipt';
 
+type HoldingPeriod = '<=1' | '1-2' | '2-3' | '3-4' | '>4';
+
 interface IncomeSourceMeta {
   key: IncomeKey;
   label: string;
@@ -76,6 +78,21 @@ const STEPS: { id: Exclude<StepId, 'intro' | 'receipt'>; label: string; icon: ty
 ];
 
 const TAX_YEAR_OPTIONS: TaxYear[] = ['2026-2027', '2025-2026', '2024-2025', '2023-2024', '2022-2023'];
+
+// Section 37(1A)-style holding-period reduction on immovable property gains.
+// Simplified for practice purposes — confirm the exact schedule for your
+// asset type and filing year before using it for a real return.
+const HOLDING_PERIOD_OPTIONS: { value: HoldingPeriod; label: string; pct: number }[] = [
+  { value: '<=1', label: 'Up to 1 year', pct: 1 },
+  { value: '1-2', label: '1 – 2 years', pct: 0.75 },
+  { value: '2-3', label: '2 – 3 years', pct: 0.5 },
+  { value: '3-4', label: '3 – 4 years', pct: 0.25 },
+  { value: '>4', label: 'More than 4 years', pct: 0 },
+];
+const HOLDING_PERIOD_PCT: Record<HoldingPeriod, number> = HOLDING_PERIOD_OPTIONS.reduce(
+  (acc, o) => ({ ...acc, [o.value]: o.pct }),
+  {} as Record<HoldingPeriod, number>,
+);
 
 // ---------------------------------------------------------------------------
 // Small presentational helpers
@@ -112,7 +129,7 @@ function NumberField({
   );
 }
 
-function ReadRow({ label, value, emphasis }: { label: string; value: string; emphasis?: 'positive' | 'negative' | 'bold' }) {
+function ReadRow({ label, value, emphasis }: { label: string; value: string; emphasis?: 'positive' | 'negative' | 'bold' | 'muted' }) {
   const valueClass =
     emphasis === 'positive'
       ? 'text-emerald-700'
@@ -120,6 +137,8 @@ function ReadRow({ label, value, emphasis }: { label: string; value: string; emp
       ? 'text-red-600'
       : emphasis === 'bold'
       ? 'text-slate-900'
+      : emphasis === 'muted'
+      ? 'text-slate-400'
       : 'text-slate-700';
   return (
     <div className="flex items-center justify-between py-1.5 text-sm">
@@ -143,7 +162,8 @@ function SectionCard({ title, icon: Icon, children }: { title: string; icon: typ
 
 // ---------------------------------------------------------------------------
 // Tax computation (mirrors the credit / slab logic in utils/taxCalculator.ts,
-// extended across multiple income sources rather than salary alone)
+// extended across multiple income sources and modeled on the real IRIS
+// 114(1) Return / 116 Wealth Statement structure rather than salary alone)
 // ---------------------------------------------------------------------------
 
 function computeSlabTax(taxableIncome: number, slabs: TaxSlab[]) {
@@ -201,14 +221,36 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
 
   // Per-source income entry
   const [salary, setSalary] = useState({ basic: 0, allowances: 0, bonus: 0 });
-  const [property, setProperty] = useState({ grossRent: 0, otherDeductions: 0 });
-  const [business, setBusiness] = useState({ netProfit: 0 });
-  const [capitalGain, setCapitalGain] = useState({ gain: 0 });
-  const [otherSources, setOtherSources] = useState({ amount: 0 });
+  const [property, setProperty] = useState({ grossRent: 0, propertyTax: 0, insurance: 0, groundRent: 0, profitOnDebt: 0 });
+  const [business, setBusiness] = useState({
+    sales: 0,
+    openingStock: 0,
+    purchases: 0,
+    closingStock: 0,
+    adminSellingExpenses: 0,
+    financialExpenses: 0,
+    otherBusinessIncome: 0,
+  });
+  const [capitalGain, setCapitalGain] = useState({
+    immovablePropertyGain: 0,
+    holdingPeriod: '<=1' as HoldingPeriod,
+    securitiesGain: 0,
+    otherCapitalAssetsGain: 0,
+  });
+  const [otherSources, setOtherSources] = useState({
+    profitOnDebt: 0,
+    royalty: 0,
+    groundRentSubLease: 0,
+    otherIncome: 0,
+    dividendIncome: 0,
+    prizeWinnings: 0,
+  });
   const [foreignSources, setForeignSources] = useState({ income: 0, taxPaid: 0 });
   const [agriculture, setAgriculture] = useState({ income: 0 });
 
   // Tax chargeable & payments
+  const [zakatPaid, setZakatPaid] = useState(0);
+  const [isTeacherResearcher, setIsTeacherResearcher] = useState(false);
   const [donationsSec61, setDonationsSec61] = useState(0);
   const [pensionSec62, setPensionSec62] = useState(0);
   const [healthSec62A, setHealthSec62A] = useState(0);
@@ -218,15 +260,22 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
 
   // Wealth statement
   const [openingNetAssets, setOpeningNetAssets] = useState(0);
-  const [foreignAssets, setForeignAssets] = useState(0);
+  const [foreignImmovableProperty, setForeignImmovableProperty] = useState(0);
+  const [foreignBankAccounts, setForeignBankAccounts] = useState(0);
+  const [foreignInvestments, setForeignInvestments] = useState(0);
+  const [foreignOtherAssets, setForeignOtherAssets] = useState(0);
   const [foreignLiabilities, setForeignLiabilities] = useState(0);
   const [propertyPK, setPropertyPK] = useState(0);
   const [investments, setInvestments] = useState(0);
   const [vehicles, setVehicles] = useState(0);
-  const [cashBank, setCashBank] = useState(0);
+  const [preciousPossessions, setPreciousPossessions] = useState(0);
+  const [cashInHand, setCashInHand] = useState(0);
+  const [cashAtBank, setCashAtBank] = useState(0);
   const [otherAssets, setOtherAssets] = useState(0);
   const [liabilities, setLiabilities] = useState(0);
   const [personalExpenses, setPersonalExpenses] = useState(0);
+  const [otherInflows, setOtherInflows] = useState(0);
+  const [otherOutflows, setOtherOutflows] = useState(0);
 
   // Submission
   const [ackNumber, setAckNumber] = useState('');
@@ -248,21 +297,72 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
   const calc = useMemo(() => {
     const config = TAX_YEARS_CONFIG[taxYear] || TAX_YEARS_CONFIG['2026-2027'];
 
+    // --- Salary ---
     const salaryTaxable = selectedSources.salary
       ? Math.max(0, Number(salary.basic || 0) + Number(salary.allowances || 0) + Number(salary.bonus || 0))
       : 0;
+
+    // --- Property (Sections 15/16 style: rent less repair allowance,
+    //     collection charges, tax/insurance/ground rent and loan markup) ---
     const repairAllowance = selectedSources.property ? Number(property.grossRent || 0) * 0.2 : 0;
+    const collectionCharges = selectedSources.property ? Number(property.grossRent || 0) * 0.06 : 0;
     const propertyTaxable = selectedSources.property
-      ? Math.max(0, Number(property.grossRent || 0) - repairAllowance - Number(property.otherDeductions || 0))
+      ? Math.max(
+          0,
+          Number(property.grossRent || 0) -
+            repairAllowance -
+            collectionCharges -
+            Number(property.propertyTax || 0) -
+            Number(property.insurance || 0) -
+            Number(property.groundRent || 0) -
+            Number(property.profitOnDebt || 0),
+        )
       : 0;
-    const businessTaxable = selectedSources.business ? Math.max(0, Number(business.netProfit || 0)) : 0;
-    const capitalGainTaxable = selectedSources.capitalGain ? Math.max(0, Number(capitalGain.gain || 0)) : 0;
-    const otherTaxable = selectedSources.otherSources ? Math.max(0, Number(otherSources.amount || 0)) : 0;
+
+    // --- Business (Trading/Manufacturing account -> P&L) ---
+    const costOfGoodsSold = selectedSources.business
+      ? Math.max(0, Number(business.openingStock || 0) + Number(business.purchases || 0) - Number(business.closingStock || 0))
+      : 0;
+    const grossProfit = selectedSources.business ? Number(business.sales || 0) - costOfGoodsSold : 0;
+    const businessNetProfit = selectedSources.business
+      ? grossProfit - Number(business.adminSellingExpenses || 0) - Number(business.financialExpenses || 0) + Number(business.otherBusinessIncome || 0)
+      : 0;
+    const businessTaxable = Math.max(0, businessNetProfit);
+
+    // --- Capital Gain (immovable property w/ holding-period reduction,
+    //     securities taxed separately u/s 37A, other assets at normal rates) ---
+    const immovableGainFull = selectedSources.capitalGain ? Number(capitalGain.immovablePropertyGain || 0) : 0;
+    const immovableGainTaxablePct = HOLDING_PERIOD_PCT[capitalGain.holdingPeriod] ?? 1;
+    const immovableGainTaxable = immovableGainFull * immovableGainTaxablePct;
+    const otherCapitalGainTaxable = selectedSources.capitalGain ? Math.max(0, Number(capitalGain.otherCapitalAssetsGain || 0)) : 0;
+    const capitalGainTaxable = Math.max(0, immovableGainTaxable + otherCapitalGainTaxable);
+    const securitiesGain = selectedSources.capitalGain ? Number(capitalGain.securitiesGain || 0) : 0;
+
+    // --- Other Sources (profit on debt/royalty/ground rent/misc at normal
+    //     rates; dividend & prize winnings sit in their own final-tax block) ---
+    const otherTaxable = selectedSources.otherSources
+      ? Math.max(
+          0,
+          Number(otherSources.profitOnDebt || 0) +
+            Number(otherSources.royalty || 0) +
+            Number(otherSources.groundRentSubLease || 0) +
+            Number(otherSources.otherIncome || 0),
+        )
+      : 0;
+    const dividendIncome = selectedSources.otherSources ? Number(otherSources.dividendIncome || 0) : 0;
+    const prizeWinnings = selectedSources.otherSources ? Number(otherSources.prizeWinnings || 0) : 0;
+
+    // --- Foreign & Agriculture ---
     const foreignTaxable = selectedSources.foreignSources ? Math.max(0, Number(foreignSources.income || 0)) : 0;
     const agricultureIncome = selectedSources.agriculture ? Math.max(0, Number(agriculture.income || 0)) : 0;
 
-    const totalTaxableIncome =
+    const totalIncomeBeforeAllowances =
       salaryTaxable + propertyTaxable + businessTaxable + capitalGainTaxable + otherTaxable + foreignTaxable;
+
+    // Deductible Allowance: Zakat paid u/s 60 comes straight off taxable
+    // income (it is not a tax credit).
+    const deductibleAllowances = Math.min(Number(zakatPaid || 0), totalIncomeBeforeAllowances);
+    const totalTaxableIncome = Math.max(0, totalIncomeBeforeAllowances - deductibleAllowances);
 
     // FBR treats a return as "salary" for slab purposes when salary is the
     // dominant source (broadly, >75% of taxable income). Simplified here:
@@ -279,7 +379,14 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
       surcharge = baseTax * config.surchargeRate;
     }
     const taxChargeable = baseTax + surcharge;
-    const avgRate = totalTaxableIncome > 0 ? taxChargeable / totalTaxableIncome : 0;
+
+    // Tax Reduction: full-time teachers/researchers get a 25% reduction, but
+    // only on the tax attributable to their salary income.
+    const salaryProportion = totalTaxableIncome > 0 ? salaryTaxable / totalTaxableIncome : 0;
+    const teacherResearcherReduction = isTeacherResearcher ? taxChargeable * salaryProportion * 0.25 : 0;
+    const taxAfterReductions = Math.max(0, taxChargeable - teacherResearcherReduction);
+
+    const avgRate = totalTaxableIncome > 0 ? taxAfterReductions / totalTaxableIncome : 0;
 
     const donationCredit = creditFor(donationsSec61, totalTaxableIncome, avgRate, 0.3);
     const pensionCredit = creditFor(pensionSec62, totalTaxableIncome, avgRate, 0.2);
@@ -288,36 +395,72 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
       ? Math.min(Number(foreignSources.taxPaid || 0), foreignTaxable * avgRate)
       : 0;
 
-    const totalReductionsAndCredits = donationCredit + pensionCredit + healthCredit + foreignTaxCredit;
-    const taxAfterCredits = Math.max(0, taxChargeable - totalReductionsAndCredits);
-    const netPosition = taxAfterCredits - Number(adjustableTax || 0);
+    const totalReductionsAndCredits = teacherResearcherReduction + donationCredit + pensionCredit + healthCredit + foreignTaxCredit;
+    const netNormalTax = Math.max(0, taxChargeable - totalReductionsAndCredits);
 
+    // Minimum tax regime: the higher of net normal tax or minimum tax
+    // chargeable applies; final/fixed tax is a separate additive block that
+    // already discharges liability for its own income.
+    const totalTaxChargeableFinal = Math.max(netNormalTax, Number(minimumTax || 0)) + Number(finalTax || 0);
+    const netPosition = totalTaxChargeableFinal - Number(adjustableTax || 0);
     const totalTaxPaidAllRegimes = Number(adjustableTax || 0) + Number(finalTax || 0) + Number(minimumTax || 0);
 
-    // Wealth reconciliation
-    const totalForeignAssets = foreignAssets;
-    const netForeignPosition = foreignAssets - foreignLiabilities;
-    const totalPersonalAssets = propertyPK + investments + vehicles + cashBank + otherAssets;
+    // --- Wealth reconciliation ---
+    const totalForeignAssets = foreignImmovableProperty + foreignBankAccounts + foreignInvestments + foreignOtherAssets;
+    const netForeignPosition = totalForeignAssets - foreignLiabilities;
+    const totalPersonalAssets = propertyPK + investments + vehicles + preciousPossessions + cashInHand + cashAtBank + otherAssets;
     const netPersonalPosition = totalPersonalAssets - liabilities;
     const closingNetAssets = netForeignPosition + netPersonalPosition;
-    const incomeForYear = totalTaxableIncome + agricultureIncome;
-    const expectedClosing = openingNetAssets + incomeForYear - taxAfterCredits - personalExpenses;
+
+    // Reconciliation uses the full cash-value of income (capital gain before
+    // any holding-period tax relief, since the relief only reduces tax, not
+    // the cash actually received) plus the separately-taxed items.
+    const grossIncomeForYear =
+      salaryTaxable +
+      propertyTaxable +
+      businessTaxable +
+      immovableGainFull +
+      otherCapitalGainTaxable +
+      securitiesGain +
+      otherTaxable +
+      dividendIncome +
+      prizeWinnings +
+      foreignTaxable +
+      agricultureIncome;
+
+    const totalOutflows = totalTaxChargeableFinal + personalExpenses + deductibleAllowances + Number(otherOutflows || 0);
+    const expectedClosing = openingNetAssets + grossIncomeForYear + Number(otherInflows || 0) - totalOutflows;
     const reconciliationDifference = closingNetAssets - expectedClosing;
 
     return {
       salaryTaxable,
-      propertyTaxable,
       repairAllowance,
+      collectionCharges,
+      propertyTaxable,
+      costOfGoodsSold,
+      grossProfit,
+      businessNetProfit,
       businessTaxable,
+      immovableGainFull,
+      immovableGainTaxablePct,
+      immovableGainTaxable,
+      otherCapitalGainTaxable,
       capitalGainTaxable,
+      securitiesGain,
       otherTaxable,
+      dividendIncome,
+      prizeWinnings,
       foreignTaxable,
       agricultureIncome,
+      totalIncomeBeforeAllowances,
+      deductibleAllowances,
       totalTaxableIncome,
       usesSalariedSlabs,
       baseTax,
       surcharge,
       taxChargeable,
+      teacherResearcherReduction,
+      taxAfterReductions,
       marginalRate,
       activeSlab,
       avgRate,
@@ -326,7 +469,8 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
       healthCredit,
       foreignTaxCredit,
       totalReductionsAndCredits,
-      taxAfterCredits,
+      netNormalTax,
+      totalTaxChargeableFinal,
       netPosition,
       totalTaxPaidAllRegimes,
       totalForeignAssets,
@@ -334,7 +478,8 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
       totalPersonalAssets,
       netPersonalPosition,
       closingNetAssets,
-      incomeForYear,
+      grossIncomeForYear,
+      totalOutflows,
       expectedClosing,
       reconciliationDifference,
     };
@@ -348,6 +493,8 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
     otherSources,
     foreignSources,
     agriculture,
+    zakatPaid,
+    isTeacherResearcher,
     donationsSec61,
     pensionSec62,
     healthSec62A,
@@ -355,15 +502,22 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
     finalTax,
     minimumTax,
     openingNetAssets,
-    foreignAssets,
+    foreignImmovableProperty,
+    foreignBankAccounts,
+    foreignInvestments,
+    foreignOtherAssets,
     foreignLiabilities,
     propertyPK,
     investments,
     vehicles,
-    cashBank,
+    preciousPossessions,
+    cashInHand,
+    cashAtBank,
     otherAssets,
     liabilities,
     personalExpenses,
+    otherInflows,
+    otherOutflows,
   ]);
 
   // -------------------------------------------------------------------------
@@ -417,12 +571,14 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
     setNoIncomeDeclared(false);
     setActiveIncomeTab('salary');
     setSalary({ basic: 0, allowances: 0, bonus: 0 });
-    setProperty({ grossRent: 0, otherDeductions: 0 });
-    setBusiness({ netProfit: 0 });
-    setCapitalGain({ gain: 0 });
-    setOtherSources({ amount: 0 });
+    setProperty({ grossRent: 0, propertyTax: 0, insurance: 0, groundRent: 0, profitOnDebt: 0 });
+    setBusiness({ sales: 0, openingStock: 0, purchases: 0, closingStock: 0, adminSellingExpenses: 0, financialExpenses: 0, otherBusinessIncome: 0 });
+    setCapitalGain({ immovablePropertyGain: 0, holdingPeriod: '<=1', securitiesGain: 0, otherCapitalAssetsGain: 0 });
+    setOtherSources({ profitOnDebt: 0, royalty: 0, groundRentSubLease: 0, otherIncome: 0, dividendIncome: 0, prizeWinnings: 0 });
     setForeignSources({ income: 0, taxPaid: 0 });
     setAgriculture({ income: 0 });
+    setZakatPaid(0);
+    setIsTeacherResearcher(false);
     setDonationsSec61(0);
     setPensionSec62(0);
     setHealthSec62A(0);
@@ -430,15 +586,22 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
     setFinalTax(0);
     setMinimumTax(0);
     setOpeningNetAssets(0);
-    setForeignAssets(0);
+    setForeignImmovableProperty(0);
+    setForeignBankAccounts(0);
+    setForeignInvestments(0);
+    setForeignOtherAssets(0);
     setForeignLiabilities(0);
     setPropertyPK(0);
     setInvestments(0);
     setVehicles(0);
-    setCashBank(0);
+    setPreciousPossessions(0);
+    setCashInHand(0);
+    setCashAtBank(0);
     setOtherAssets(0);
     setLiabilities(0);
     setPersonalExpenses(0);
+    setOtherInflows(0);
+    setOtherOutflows(0);
     setAckNumber('');
     setSubmittedAt(null);
   }
@@ -704,57 +867,169 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
             )}
 
             {activeIncomeTab === 'property' && selectedSources.property && (
-              <SectionCard title="Property / Rental Income" icon={Building2}>
+              <SectionCard title="Income from Property" icon={Building2}>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <NumberField
-                    label="Gross Rent Receipts (Annual)"
+                    label="Rent Received / Receivable (Annual)"
                     value={property.grossRent}
                     onChange={(v) => setProperty((p) => ({ ...p, grossRent: v }))}
                   />
                   <NumberField
-                    label="Other Deductions (Annual)"
-                    value={property.otherDeductions}
-                    onChange={(v) => setProperty((p) => ({ ...p, otherDeductions: v }))}
-                    hint="Property tax, insurance, financial charges"
+                    label="Property / Local Tax Paid (Annual)"
+                    value={property.propertyTax}
+                    onChange={(v) => setProperty((p) => ({ ...p, propertyTax: v }))}
+                  />
+                  <NumberField
+                    label="Insurance Premium (Annual)"
+                    value={property.insurance}
+                    onChange={(v) => setProperty((p) => ({ ...p, insurance: v }))}
+                  />
+                  <NumberField
+                    label="Ground Rent (Annual)"
+                    value={property.groundRent}
+                    onChange={(v) => setProperty((p) => ({ ...p, groundRent: v }))}
+                  />
+                  <NumberField
+                    label="Profit on Debt (loan for acquiring/constructing the property)"
+                    value={property.profitOnDebt}
+                    onChange={(v) => setProperty((p) => ({ ...p, profitOnDebt: v }))}
                   />
                 </div>
-                <p className="text-xs text-slate-500 mt-3">
-                  A standard 1/5th repair allowance ({formatPKR(calc.repairAllowance)}) is deducted automatically, same
-                  as under FBR rules.
-                </p>
+                <div className="mt-4 pt-3 border-t border-slate-100 space-y-1">
+                  <ReadRow label="1/5th Repair Allowance (auto)" value={formatPKR(calc.repairAllowance)} emphasis="muted" />
+                  <ReadRow label="Collection Charges, 6% cap (auto)" value={formatPKR(calc.collectionCharges)} emphasis="muted" />
+                  <ReadRow label="Taxable Property Income" value={formatPKR(calc.propertyTaxable)} emphasis="bold" />
+                </div>
               </SectionCard>
             )}
 
             {activeIncomeTab === 'business' && selectedSources.business && (
               <SectionCard title="Income from Business" icon={Coins}>
-                <NumberField
-                  label="Net Business Profit (Annual)"
-                  value={business.netProfit}
-                  onChange={(v) => setBusiness({ netProfit: v })}
-                  hint="Trading, manufacturing or services profit, after business expenses"
-                />
+                <p className="text-xs text-slate-500 mb-3 font-semibold uppercase tracking-wide">Trading / Manufacturing Account</p>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <NumberField label="Sales / Turnover (Annual)" value={business.sales} onChange={(v) => setBusiness((p) => ({ ...p, sales: v }))} />
+                  <NumberField label="Opening Stock (Annual)" value={business.openingStock} onChange={(v) => setBusiness((p) => ({ ...p, openingStock: v }))} />
+                  <NumberField label="Purchases (Annual)" value={business.purchases} onChange={(v) => setBusiness((p) => ({ ...p, purchases: v }))} />
+                  <NumberField label="Closing Stock (Annual)" value={business.closingStock} onChange={(v) => setBusiness((p) => ({ ...p, closingStock: v }))} />
+                </div>
+                <div className="mt-3 space-y-1">
+                  <ReadRow label="Cost of Goods Sold (auto)" value={formatPKR(calc.costOfGoodsSold)} emphasis="muted" />
+                  <ReadRow label="Gross Profit (auto)" value={formatPKR(calc.grossProfit)} emphasis="muted" />
+                </div>
+
+                <p className="text-xs text-slate-500 mt-5 mb-3 font-semibold uppercase tracking-wide">Profit & Loss Account</p>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <NumberField
+                    label="Administrative & Selling Expenses (Annual)"
+                    value={business.adminSellingExpenses}
+                    onChange={(v) => setBusiness((p) => ({ ...p, adminSellingExpenses: v }))}
+                  />
+                  <NumberField
+                    label="Financial Expenses (Annual)"
+                    value={business.financialExpenses}
+                    onChange={(v) => setBusiness((p) => ({ ...p, financialExpenses: v }))}
+                    hint="Bank markup and similar finance costs"
+                  />
+                  <NumberField
+                    label="Other Business Income (Annual)"
+                    value={business.otherBusinessIncome}
+                    onChange={(v) => setBusiness((p) => ({ ...p, otherBusinessIncome: v }))}
+                  />
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-100">
+                  <ReadRow label="Net Profit (auto)" value={formatPKR(calc.businessNetProfit)} emphasis="bold" />
+                  {calc.businessNetProfit < 0 && (
+                    <p className="text-xs text-amber-700 mt-1">
+                      This shows as a business loss — real returns can carry a loss forward, which this practice tool doesn't model.
+                    </p>
+                  )}
+                </div>
               </SectionCard>
             )}
 
             {activeIncomeTab === 'capitalGain' && selectedSources.capitalGain && (
               <SectionCard title="Capital Gain" icon={ArrowRight}>
-                <NumberField
-                  label="Capital Gain Amount (Annual)"
-                  value={capitalGain.gain}
-                  onChange={(v) => setCapitalGain({ gain: v })}
-                  hint="Gain on securities, immovable property or other capital assets. Real rates vary by asset type and holding period — this is a simplified practice entry."
-                />
+                <p className="text-xs text-slate-500 mb-3 font-semibold uppercase tracking-wide">Gain on Immovable Property</p>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <NumberField
+                    label="Gain on Immovable Property (Annual)"
+                    value={capitalGain.immovablePropertyGain}
+                    onChange={(v) => setCapitalGain((p) => ({ ...p, immovablePropertyGain: v }))}
+                  />
+                  <label className="block">
+                    <span className="block text-sm font-semibold text-slate-700 mb-1">Holding Period</span>
+                    <select
+                      value={capitalGain.holdingPeriod}
+                      onChange={(e) => setCapitalGain((p) => ({ ...p, holdingPeriod: e.target.value as HoldingPeriod }))}
+                      className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 outline-none text-sm bg-white"
+                    >
+                      {HOLDING_PERIOD_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label} ({(o.pct * 100).toFixed(0)}% taxable)
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <ReadRow label="Taxable Portion (auto)" value={formatPKR(calc.immovableGainTaxable)} emphasis="muted" />
+
+                <p className="text-xs text-slate-500 mt-5 mb-3 font-semibold uppercase tracking-wide">Other Capital Gains</p>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <NumberField
+                    label="Gain on Listed Securities / PSX (Annual)"
+                    value={capitalGain.securitiesGain}
+                    onChange={(v) => setCapitalGain((p) => ({ ...p, securitiesGain: v }))}
+                    hint="Taxed separately under Section 37A — shown informationally, not mixed into the normal-rate computation below"
+                  />
+                  <NumberField
+                    label="Gain on Other Capital Assets (Annual)"
+                    value={capitalGain.otherCapitalAssetsGain}
+                    onChange={(v) => setCapitalGain((p) => ({ ...p, otherCapitalAssetsGain: v }))}
+                    hint="Fully taxable at normal rates"
+                  />
+                </div>
+                <p className="text-xs text-slate-500 mt-3">
+                  Real holding-period percentages and separate-block rates vary by asset type and filing year — confirm the exact figures before using this for a real return.
+                </p>
               </SectionCard>
             )}
 
             {activeIncomeTab === 'otherSources' && selectedSources.otherSources && (
               <SectionCard title="Income from Other Sources" icon={Wallet}>
-                <NumberField
-                  label="Other Income (Annual)"
-                  value={otherSources.amount}
-                  onChange={(v) => setOtherSources({ amount: v })}
-                  hint="Profit on debt, prizes, royalty and other miscellaneous income"
-                />
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <NumberField
+                    label="Profit on Debt / Bank Profit (Annual)"
+                    value={otherSources.profitOnDebt}
+                    onChange={(v) => setOtherSources((p) => ({ ...p, profitOnDebt: v }))}
+                  />
+                  <NumberField label="Royalty (Annual)" value={otherSources.royalty} onChange={(v) => setOtherSources((p) => ({ ...p, royalty: v }))} />
+                  <NumberField
+                    label="Ground Rent / Rent from Sub-Lease (Annual)"
+                    value={otherSources.groundRentSubLease}
+                    onChange={(v) => setOtherSources((p) => ({ ...p, groundRentSubLease: v }))}
+                  />
+                  <NumberField
+                    label="Other Income Not Falling Under Any Other Head (Annual)"
+                    value={otherSources.otherIncome}
+                    onChange={(v) => setOtherSources((p) => ({ ...p, otherIncome: v }))}
+                  />
+                </div>
+
+                <p className="text-xs text-slate-500 mt-5 mb-3 font-semibold uppercase tracking-wide">Taxed Separately (informational)</p>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <NumberField
+                    label="Dividend Income (Annual)"
+                    value={otherSources.dividendIncome}
+                    onChange={(v) => setOtherSources((p) => ({ ...p, dividendIncome: v }))}
+                    hint="Taxed separately under Section 5 — not mixed into the normal-rate computation below"
+                  />
+                  <NumberField
+                    label="Prize on Prize Bonds / Lottery / Crossword (Annual)"
+                    value={otherSources.prizeWinnings}
+                    onChange={(v) => setOtherSources((p) => ({ ...p, prizeWinnings: v }))}
+                    hint="Final tax regime — withheld at source"
+                  />
+                </div>
               </SectionCard>
             )}
 
@@ -794,7 +1069,30 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
 
         {step === 'taxChargeable' && (
           <div className="space-y-4">
-            <SectionCard title="Allowances, Reductions & Tax Credits" icon={ShieldCheck}>
+            <SectionCard title="Deductible Allowances" icon={Wallet}>
+              <NumberField
+                label="Zakat Paid (Annual, u/s 60)"
+                value={zakatPaid}
+                onChange={setZakatPaid}
+                hint="Deducted directly from taxable income — not a tax credit"
+              />
+            </SectionCard>
+
+            <SectionCard title="Tax Reductions" icon={ShieldCheck}>
+              <label className="flex items-center gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isTeacherResearcher}
+                  onChange={(e) => setIsTeacherResearcher(e.target.checked)}
+                  className="accent-emerald-700"
+                />
+                <span className="text-sm font-semibold text-slate-700">
+                  I am a full-time Teacher or Researcher (25% reduction on the tax attributable to salary income)
+                </span>
+              </label>
+            </SectionCard>
+
+            <SectionCard title="Tax Credits" icon={Calculator}>
               <div className="grid sm:grid-cols-3 gap-4">
                 <NumberField label="Charitable Donations (u/s 61)" value={donationsSec61} onChange={setDonationsSec61} hint="Capped at 30% of taxable income" />
                 <NumberField label="VPS Pension Contribution (u/s 62)" value={pensionSec62} onChange={setPensionSec62} hint="Capped at 20% of taxable income" />
@@ -804,28 +1102,48 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
 
             <SectionCard title="Withholding & Advance Tax Paid" icon={Landmark}>
               <div className="grid sm:grid-cols-3 gap-4">
-                <NumberField label="Adjustable Tax Withheld" value={adjustableTax} onChange={setAdjustableTax} hint="Adjusted against your normal tax liability below" />
-                <NumberField label="Final Tax Withheld" value={finalTax} onChange={setFinalTax} hint="Discharges liability for that income — informational" />
-                <NumberField label="Minimum Tax Withheld" value={minimumTax} onChange={setMinimumTax} hint="Compared with normal tax; higher applies — informational" />
+                <NumberField label="Adjustable Tax Withheld" value={adjustableTax} onChange={setAdjustableTax} hint="Adjusted against your net tax chargeable below" />
+                <NumberField label="Final Tax Withheld" value={finalTax} onChange={setFinalTax} hint="Discharges liability for that income — added on top" />
+                <NumberField label="Minimum Tax Withheld" value={minimumTax} onChange={setMinimumTax} hint="Compared with normal tax; higher of the two applies" />
               </div>
             </SectionCard>
 
-            <SectionCard title="Computation" icon={Calculator}>
-              <ReadRow label="Total Taxable Income" value={formatPKR(calc.totalTaxableIncome)} emphasis="bold" />
+            <SectionCard title="Computations" icon={Calculator}>
+              <ReadRow label="Total Income (all sources)" value={formatPKR(calc.totalIncomeBeforeAllowances)} />
+              <ReadRow label="Less: Deductible Allowances (Zakat)" value={`- ${formatPKR(calc.deductibleAllowances)}`} emphasis="positive" />
+              <ReadRow label="Taxable Income" value={formatPKR(calc.totalTaxableIncome)} emphasis="bold" />
               <ReadRow label="Slab Applied" value={calc.usesSalariedSlabs ? 'Salaried Individual' : 'Non-Salaried / AOP'} />
               <ReadRow label={`Marginal Rate (${calc.activeSlab.rate * 100}%)`} value={`${calc.marginalRate.toFixed(0)}%`} />
               <div className="h-px bg-slate-200 my-2" />
-              <ReadRow label="Tax Chargeable (before credits)" value={formatPKR(calc.baseTax)} />
+              <ReadRow label="Tax Chargeable on Taxable Income" value={formatPKR(calc.baseTax)} />
               {calc.surcharge > 0 && <ReadRow label="Surcharge" value={formatPKR(calc.surcharge)} />}
-              <ReadRow label="Total Reductions & Credits" value={`- ${formatPKR(calc.totalReductionsAndCredits)}`} emphasis="positive" />
-              <ReadRow label="Tax After Credits" value={formatPKR(calc.taxAfterCredits)} emphasis="bold" />
-              <ReadRow label="Adjustable Tax Already Paid" value={`- ${formatPKR(adjustableTax)}`} emphasis="positive" />
+              {calc.teacherResearcherReduction > 0 && (
+                <ReadRow label="Less: Tax Reduction (Teacher/Researcher)" value={`- ${formatPKR(calc.teacherResearcherReduction)}`} emphasis="positive" />
+              )}
+              <ReadRow
+                label="Less: Tax Credits (donations, pension, health, foreign)"
+                value={`- ${formatPKR(calc.totalReductionsAndCredits - calc.teacherResearcherReduction)}`}
+                emphasis="positive"
+              />
+              <ReadRow label="Net Tax Chargeable (normal)" value={formatPKR(calc.netNormalTax)} emphasis="bold" />
+              {minimumTax > calc.netNormalTax && (
+                <ReadRow label="Minimum Tax Chargeable applies instead" value={formatPKR(minimumTax)} emphasis="negative" />
+              )}
+              {finalTax > 0 && <ReadRow label="Plus: Final / Fixed Tax (separate block)" value={`+ ${formatPKR(finalTax)}`} />}
+              <ReadRow label="Total Tax Chargeable" value={formatPKR(calc.totalTaxChargeableFinal)} emphasis="bold" />
+              <ReadRow label="Less: Adjustable Tax Paid" value={`- ${formatPKR(adjustableTax)}`} emphasis="positive" />
               <div className="h-px bg-slate-200 my-2" />
               <ReadRow
                 label={calc.netPosition >= 0 ? 'Tax Payable' : 'Refundable'}
                 value={formatPKR(Math.abs(calc.netPosition))}
                 emphasis={calc.netPosition >= 0 ? 'negative' : 'positive'}
               />
+              {(calc.securitiesGain > 0 || calc.dividendIncome > 0 || calc.prizeWinnings > 0) && (
+                <p className="text-xs text-slate-500 mt-3 pt-3 border-t border-slate-100">
+                  Not included above — taxed separately: securities gain {formatPKR(calc.securitiesGain)}, dividend income{' '}
+                  {formatPKR(calc.dividendIncome)}, prize winnings {formatPKR(calc.prizeWinnings)}.
+                </p>
+              )}
             </SectionCard>
           </div>
         )}
@@ -834,41 +1152,63 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
           <div className="space-y-4">
             <SectionCard title="116A — Foreign Assets & Liabilities" icon={Globe2}>
               <div className="grid sm:grid-cols-2 gap-4">
-                <NumberField label="Total Foreign Assets" value={foreignAssets} onChange={setForeignAssets} />
-                <NumberField label="Total Foreign Liabilities" value={foreignLiabilities} onChange={setForeignLiabilities} />
+                <NumberField label="Foreign Immovable Property" value={foreignImmovableProperty} onChange={setForeignImmovableProperty} />
+                <NumberField label="Foreign Bank Accounts" value={foreignBankAccounts} onChange={setForeignBankAccounts} />
+                <NumberField label="Foreign Investments / Securities" value={foreignInvestments} onChange={setForeignInvestments} />
+                <NumberField label="Other Foreign Assets" value={foreignOtherAssets} onChange={setForeignOtherAssets} />
+                <NumberField label="Foreign Liabilities (loans payable)" value={foreignLiabilities} onChange={setForeignLiabilities} />
               </div>
+              <ReadRow label="Total Foreign Assets (auto)" value={formatPKR(calc.totalForeignAssets)} emphasis="muted" />
             </SectionCard>
 
             <SectionCard title="Personal Assets (Pakistan)" icon={Wallet}>
               <div className="grid sm:grid-cols-2 gap-4">
                 <NumberField label="Immovable Property" value={propertyPK} onChange={setPropertyPK} />
-                <NumberField label="Investments / Securities" value={investments} onChange={setInvestments} />
-                <NumberField label="Vehicles" value={vehicles} onChange={setVehicles} />
-                <NumberField label="Cash & Bank Balances" value={cashBank} onChange={setCashBank} />
+                <NumberField label="Investments / Securities / Insurance" value={investments} onChange={setInvestments} />
+                <NumberField label="Motor Vehicles" value={vehicles} onChange={setVehicles} />
+                <NumberField label="Precious Possessions (Jewelry / Gold)" value={preciousPossessions} onChange={setPreciousPossessions} />
+                <NumberField label="Cash in Hand" value={cashInHand} onChange={setCashInHand} />
+                <NumberField label="Cash at Bank" value={cashAtBank} onChange={setCashAtBank} />
                 <NumberField label="Other Assets" value={otherAssets} onChange={setOtherAssets} />
-                <NumberField label="Personal Liabilities (loans etc.)" value={liabilities} onChange={setLiabilities} />
+                <NumberField label="Personal Liabilities (loans, payables)" value={liabilities} onChange={setLiabilities} />
               </div>
+              <ReadRow label="Total Personal Assets (auto)" value={formatPKR(calc.totalPersonalAssets)} emphasis="muted" />
             </SectionCard>
 
-            <SectionCard title="Personal Expenses & Opening Position" icon={Coins}>
+            <SectionCard title="Personal Expenses, Other Flows & Opening Position" icon={Coins}>
               <div className="grid sm:grid-cols-2 gap-4">
-                <NumberField label="Personal Expenses (Annual)" value={personalExpenses} onChange={setPersonalExpenses} />
+                <NumberField label="Personal / Household Expenses (Annual)" value={personalExpenses} onChange={setPersonalExpenses} />
                 <NumberField
                   label="Opening Net Assets (Last Year's Closing)"
                   value={openingNetAssets}
                   onChange={setOpeningNetAssets}
+                />
+                <NumberField
+                  label="Other Inflows (Annual)"
+                  value={otherInflows}
+                  onChange={setOtherInflows}
+                  hint="Gifts, loans or inheritance received, foreign remittances"
+                />
+                <NumberField
+                  label="Other Outflows (Annual)"
+                  value={otherOutflows}
+                  onChange={setOtherOutflows}
+                  hint="Gifts or loans given, other payments not claimed as a credit above"
                 />
               </div>
             </SectionCard>
 
             <SectionCard title="Reconciliation of Net Assets" icon={ShieldCheck}>
               <ReadRow label="Opening Net Assets" value={formatPKR(openingNetAssets)} />
-              <ReadRow label="Income for the Year (incl. exempt agriculture)" value={`+ ${formatPKR(calc.incomeForYear)}`} emphasis="positive" />
-              <ReadRow label="Tax Paid" value={`- ${formatPKR(calc.taxAfterCredits)}`} emphasis="negative" />
+              <ReadRow label="Income for the Year (incl. exempt & separately-taxed)" value={`+ ${formatPKR(calc.grossIncomeForYear)}`} emphasis="positive" />
+              <ReadRow label="Other Inflows" value={`+ ${formatPKR(otherInflows)}`} emphasis="positive" />
+              <ReadRow label="Total Tax Chargeable" value={`- ${formatPKR(calc.totalTaxChargeableFinal)}`} emphasis="negative" />
+              <ReadRow label="Zakat Paid" value={`- ${formatPKR(calc.deductibleAllowances)}`} emphasis="negative" />
               <ReadRow label="Personal Expenses" value={`- ${formatPKR(personalExpenses)}`} emphasis="negative" />
+              <ReadRow label="Other Outflows" value={`- ${formatPKR(otherOutflows)}`} emphasis="negative" />
               <div className="h-px bg-slate-200 my-2" />
               <ReadRow label="Expected Closing Net Assets" value={formatPKR(calc.expectedClosing)} />
-              <ReadRow label="Actual Closing Net Assets" value={formatPKR(calc.closingNetAssets)} emphasis="bold" />
+              <ReadRow label="Actual Closing Net Assets (from Assets/Liabilities above)" value={formatPKR(calc.closingNetAssets)} emphasis="bold" />
               <ReadRow
                 label="Reconciliation Difference"
                 value={formatPKR(calc.reconciliationDifference)}
@@ -913,9 +1253,10 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
               />
             </SectionCard>
             <SectionCard title="Tax Chargeable & Payments" icon={Calculator}>
-              <ReadRow label="Total Taxable Income" value={formatPKR(calc.totalTaxableIncome)} />
-              <ReadRow label="Tax Chargeable (before credits)" value={formatPKR(calc.taxChargeable)} />
-              <ReadRow label="Total Credits & Reductions" value={formatPKR(calc.totalReductionsAndCredits)} />
+              <ReadRow label="Taxable Income" value={formatPKR(calc.totalTaxableIncome)} />
+              <ReadRow label="Tax Chargeable (before reductions/credits)" value={formatPKR(calc.taxChargeable)} />
+              <ReadRow label="Total Reductions & Credits" value={formatPKR(calc.totalReductionsAndCredits)} />
+              <ReadRow label="Total Tax Chargeable (incl. final/minimum tax)" value={formatPKR(calc.totalTaxChargeableFinal)} />
               <ReadRow
                 label={calc.netPosition >= 0 ? 'Tax Payable' : 'Refundable'}
                 value={formatPKR(Math.abs(calc.netPosition))}
@@ -948,7 +1289,7 @@ export default function IrisPracticeSimulator({ onExit }: IrisPracticeSimulatorP
               <ReadRow label="Tax Year" value={TAX_YEARS_CONFIG[taxYear]?.label || taxYear} />
               <ReadRow label="Date & Time" value={submittedAt ? submittedAt.toLocaleString('en-PK') : ''} />
               <div className="h-px bg-slate-200 my-2" />
-              <ReadRow label="Total Taxable Income" value={formatPKR(calc.totalTaxableIncome)} />
+              <ReadRow label="Taxable Income" value={formatPKR(calc.totalTaxableIncome)} />
               <ReadRow
                 label={calc.netPosition >= 0 ? 'Tax Payable' : 'Refundable'}
                 value={formatPKR(Math.abs(calc.netPosition))}
