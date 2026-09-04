@@ -2,6 +2,7 @@ import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { Header } from './components/Header';
 import { AuthModal } from './components/AuthModal';
 import { PayslipTaxCertificateModal } from './components/PayslipTaxCertificateModal';
+import { PageIntroSection } from './components/PageIntroSection';
 // Each tax calculator tab is code-split so the browser only downloads the
 // calculator the visitor is actually looking at, instead of all of them
 // up front on first load.
@@ -233,6 +234,11 @@ export default function App() {
             Save PDF
           </button>
         </div>}
+
+        {/* Real, visible intro + "how to use" copy for this page — see
+            PageIntroSection.tsx for why this exists alongside the FAQ
+            section below. */}
+        {!CONTENT_PAGE_TABS.has(activeTab) && !isFocusMode && <PageIntroSection activeTab={activeTab} />}
 
         <div id="active-calculator-content">
         <Suspense fallback={<CalculatorLoadingFallback />}>
